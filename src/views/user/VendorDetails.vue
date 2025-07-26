@@ -1,0 +1,247 @@
+<script setup>
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useServiceStore } from '@/stores/user/servicesStore'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import { RouterLink } from 'vue-router'
+
+const props = defineProps({
+  id: String,
+})
+
+const serviceStore = useServiceStore()
+const { allServices } = storeToRefs(serviceStore)
+const { getAllServices } = serviceStore
+
+onMounted(async () => {
+  if (allServices.value.length === 0) {
+    await getAllServices()
+  }
+})
+
+// Get current service based on ID
+const currentService = computed(() =>
+  allServices.value.find((s) => String(s.id) === String(props.id)),
+)
+
+// Images fallback (or from service.image_filename later if you add multiple)
+const images = computed(() => {
+  const img = currentService.value?.image_filename
+  return img ? [img] : ['/images/img1.jpg', '/images/img2.jpg', '/images/img3.jpg']
+})
+
+const currentIndex = ref(0)
+let interval = null
+
+onMounted(() => {
+  interval = setInterval(() => {
+    currentIndex.value = (currentIndex.value + 1) % images.value.length
+  }, 5000)
+})
+
+onBeforeUnmount(() => {
+  clearInterval(interval)
+})
+</script>
+
+<template>
+  <DefaultLayout class="md:px-40">
+    <div v-if="currentService" class="flex flex-col md:flex-row gap-6 items-stretch">
+      <!-- Left Side Images -->
+      <div class="w-full md:w-1/2">
+        <!-- Mobile Carousel -->
+        <div class="block md:hidden w-full h-48 overflow-hidden rounded-lg relative">
+          <img
+            :src="images[currentIndex]"
+            alt="Service Image"
+            class="w-full h-full object-cover transition-all duration-500 bg-gray-200"
+          />
+          <div class="absolute bottom-2 w-full flex justify-center items-center gap-2">
+            <span
+              v-for="(img, index) in images"
+              :key="index"
+              :class="[
+                'w-2.5 h-2.5 rounded-full transition-all',
+                currentIndex === index ? 'bg-blue-500' : 'bg-gray-300',
+              ]"
+            ></span>
+          </div>
+        </div>
+
+        <!-- Desktop Image Stack -->
+        <div class="hidden md:flex flex-col gap-4">
+          <img
+            v-for="(img, i) in images"
+            :key="i"
+            :src="img"
+            class="w-full h-40 object-cover rounded-lg bg-gray-200"
+          />
+        </div>
+      </div>
+
+      <!-- Right Side Content -->
+      <div class="w-full md:w-1/2 p-2 md:p-4">
+        <h2 class="text-lg font-semibold">
+          {{ currentService.name }}
+        </h2>
+
+        <div class="flex items-center gap-2 mt-1">
+          <span v-if="currentService.price" class="line-through text-gray-400 text-sm"
+            >₹{{ currentService.price }}</span
+          >
+          <span class="text-lg font-bold text-black">
+            ₹{{ currentService.offer_price }}<span class="text-xs text-gray-500">*</span>
+          </span>
+        </div>
+
+        <p class="text-sm text-gray-600 mt-3">
+          {{ currentService.description }}
+        </p>
+
+        <!-- Advantages -->
+        <div class="mt-4 space-y-2 text-sm">
+          <div class="flex items-start gap-2">
+            <i class="pi pi-check text-blue-500 text-xl"></i>
+            <!-- <span class="text-blue-500 text-xl">✔</span> -->
+            <p>{{ currentService.advantages }}</p>
+          </div>
+        </div>
+
+        <!-- Book Button -->
+        <RouterLink
+          :to="`/book/${currentService.id}`"
+          class="mt-6 inline-block text-center w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-all"
+        >
+          Book
+        </RouterLink>
+
+        <!-- Disadvantages -->
+        <div class="mt-4 space-y-2 text-sm">
+          <div class="flex items-start gap-2">
+            <i class="pi pi-check text-red-500 text-lg"></i>
+            <!-- <span class="text-red-500 text-xl">⚠</span> -->
+            <p>{{ currentService.disadvantages }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="text-center py-20 text-gray-600">Loading service details...</div>
+  </DefaultLayout>
+</template>
+
+<!-- <script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { storeToRefs } from 'pinia'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import { RouterLink } from 'vue-router'
+import { useServiceStore } from '@/stores/user/servicesStore'
+
+const serviceStore = useServiceStore()
+const { allServices } = storeToRefs(serviceStore)
+const { getAllServices } = serviceStore
+
+onMounted(() => {
+  getAllServices
+})
+
+// Props
+const props = defineProps({
+  id: String,
+})
+
+// Image Carousel Logic (mobile only)
+const images = ['/images/img1.jpg', '/images/img2.jpg', '/images/img3.jpg']
+
+const currentIndex = ref(0)
+let interval = null
+
+onMounted(() => {
+  interval = setInterval(() => {
+    currentIndex.value = (currentIndex.value + 1) % images.length
+  }, 5000)
+})
+
+onBeforeUnmount(() => {
+  clearInterval(interval)
+})
+</script>
+
+<template>
+  <DefaultLayout class="md:px-40">
+    <div class="flex flex-col md:flex-row gap-6 items-stretch">
+
+      <div class="w-full md:w-1/2">
+        <div class="block md:hidden w-full h-48 overflow-hidden rounded-lg relative">
+          <img
+            :src="images[currentIndex]"
+            alt="Service Image"
+            class="w-full h-full object-cover transition-all duration-500 bg-gray-200"
+          />
+      
+          <div class="absolute bottom-2 w-full flex justify-center items-center gap-2">
+            <span
+              v-for="(img, index) in images"
+              :key="index"
+              :class="[
+                'w-2.5 h-2.5 rounded-full transition-all',
+                currentIndex === index ? 'bg-blue-500' : 'bg-gray-300',
+              ]"
+            ></span>
+          </div>
+        </div>
+
+     
+        <div class="hidden md:flex flex-col gap-4">
+          <img
+            v-for="(img, i) in images"
+            :key="i"
+            :src="img"
+            class="w-full h-40 object-cover rounded-lg bg-gray-200"
+          />
+        </div>
+      </div>
+
+      <div class="w-full md:w-1/2 p-2 md:p-4">
+        <h2 class="text-lg font-semibold">Interior + Exterior Foam Wash</h2>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="line-through text-gray-400 text-sm">₹700</span>
+          <span class="text-lg font-bold text-black">
+            ₹499<span class="text-xs text-gray-500">*</span>
+          </span>
+        </div>
+
+        <p class="text-sm text-gray-600 mt-3">
+          Restore your car’s shine with our professional car cleaning service. From exterior wash to
+          interior vacuuming — we make your ride look and feel brand new, right at your doorstep.
+        </p>
+
+        <div class="mt-4 space-y-2 text-sm">
+          <div class="flex items-start gap-2">
+            <span class="text-blue-500 text-xl">✔</span>
+            <p>Foam Wash & Tyre Polish</p>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-blue-500 text-xl">✔</span>
+            <p>Interior Vacuum Cleaning</p>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-blue-500 text-xl">✔</span>
+            <p>Exterior High Pressure Wash</p>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-blue-500 text-xl">✔</span>
+            <p>Tyre Polish</p>
+          </div>
+        </div>
+
+        <RouterLink
+          :to="`/book/${id}`"
+          class="mt-6 inline-block text-center w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-all"
+        >
+          Book
+        </RouterLink>
+      </div>
+    </div>
+  </DefaultLayout>
+</template> -->

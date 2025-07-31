@@ -1,25 +1,43 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useReviewStore } from '@/stores/user/reviewStore'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const reviewStore = useReviewStore()
 
 const rating = ref(0)
 const hoverRating = ref(0)
 const reviewText = ref('')
 const photos = ref([])
+const photoFiles = ref([]) // actual File objects
 
 const maxChars = 400
-
 const remainingChars = computed(() => maxChars - reviewText.value.length)
 
 const handleFileUpload = (e) => {
   const files = e.target.files
   for (let i = 0; i < files.length; i++) {
-    photos.value.push(URL.createObjectURL(files[i]))
+    const file = files[i]
+    photoFiles.value.push(file)
+    photos.value.push(URL.createObjectURL(file)) // preview
   }
 }
 
 const setRating = (value) => {
   rating.value = value
 }
+
+const handleSubmit = async () => {
+  await reviewStore.submitReview({
+    booking_id: 'id',
+    rating: rating.value,
+    message: reviewText.value,
+    files: photoFiles.value,
+  })
+}
+const bookingId = route.params.id
 </script>
 
 <template>
@@ -34,13 +52,15 @@ const setRating = (value) => {
             @mouseleave="hoverRating = 0"
             @click="setRating(i)"
             :class="[
-              (hoverRating >= i || rating >= i) ? 'text-yellow-400' : 'text-gray-300',
-              'w-8 h-8 cursor-pointer transition-colors'
+              hoverRating >= i || rating >= i ? 'text-yellow-400' : 'text-gray-300',
+              'w-8 h-8 cursor-pointer transition-colors',
             ]"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967h4.175c.969 0 1.371 1.24.588 1.81l-3.382 2.457 1.286 3.966c.3.922-.755 1.688-1.54 1.118L10 13.348l-3.382 2.457c-.784.57-1.838-.196-1.539-1.118l1.285-3.966-3.382-2.457c-.784-.57-.38-1.81.588-1.81h4.175l1.286-3.967z"/>
+            <path
+              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967h4.175c.969 0 1.371 1.24.588 1.81l-3.382 2.457 1.286 3.966c.3.922-.755 1.688-1.54 1.118L10 13.348l-3.382 2.457c-.784.57-1.838-.196-1.539-1.118l1.285-3.966-3.382-2.457c-.784-.57-.38-1.81.588-1.81h4.175l1.286-3.967z"
+            />
           </svg>
         </template>
       </div>
@@ -52,13 +72,19 @@ const setRating = (value) => {
       <div class="border border-dashed border-gray-300 rounded-lg p-6 text-center space-y-3">
         <p class="text-gray-600">Upload Photos</p>
         <p class="text-sm text-gray-500">Tap to Upload Photos from gallery or take new ones</p>
-        <label class="inline-block px-4 py-2 bg-gray-100 border rounded cursor-pointer hover:bg-gray-200 transition">
+        <label
+          class="inline-block px-4 py-2 bg-gray-100 border rounded cursor-pointer hover:bg-gray-200 transition"
+        >
           + Add Photos
           <input type="file" accept="image/*,video/*" multiple hidden @change="handleFileUpload" />
         </label>
 
         <div v-if="photos.length" class="flex flex-wrap gap-3 mt-4 justify-center">
-          <div v-for="(img, index) in photos" :key="index" class="w-20 h-20 overflow-hidden rounded shadow">
+          <div
+            v-for="(img, index) in photos"
+            :key="index"
+            class="w-20 h-20 overflow-hidden rounded shadow"
+          >
             <img :src="img" alt="Preview" class="object-cover w-full h-full" />
           </div>
         </div>
@@ -81,6 +107,7 @@ const setRating = (value) => {
     <div>
       <button
         class="w-full bg-[#2076E2] text-white font-medium py-2 rounded-md"
+        @click="handleSubmit"
       >
         Submit Review
       </button>

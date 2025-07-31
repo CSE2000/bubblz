@@ -1,4 +1,0 @@
-const endpoints =  {
-    getBanner : '/categories',
-
-}

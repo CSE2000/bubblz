@@ -57,6 +57,40 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useForgetPasswordStore } from '@/stores/auth/forgetPassword'
+
+const router = useRouter()
+const forgetPasswordStore = useForgetPasswordStore()
+
+const password = ref('')
+const confirmPassword = ref('')
+const termsAccepted = ref(false)
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+
+async function handleReset() {
+  if (!password.value || password.value.length < 6) {
+    alert('Password must be at least 6 characters.')
+    return
+  }
+  if (password.value !== confirmPassword.value) {
+    alert('Passwords do not match.')
+    return
+  }
+
+  const success = await forgetPasswordStore.resetPassword(password.value)
+  if (success) {
+    alert('Password updated successfully.')
+    router.push('/login')
+  } else {
+    alert(forgetPasswordStore.error)
+  }
+}
+</script>
+
+<!-- <script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const password = ref('')
@@ -79,4 +113,4 @@ function handleReset() {
   alert('Password updated successfully.')
   router.push('/login')
 }
-</script>
+</script> -->

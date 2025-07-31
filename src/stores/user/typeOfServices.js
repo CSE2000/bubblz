@@ -1,4 +1,3 @@
-// stores/typeOfServices.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { makeRequest } from '@/request/request'

@@ -23,6 +23,7 @@ const props = defineProps({
 const router = useRouter()
 
 const goToServiceList = () => {
-  router.push({ name: 'ServiceList', params: { type: props.type } })
+  // Use the label (service name) as the type parameter
+  router.push({ name: 'ServiceList', params: { type: props.label } })
 }
 </script>

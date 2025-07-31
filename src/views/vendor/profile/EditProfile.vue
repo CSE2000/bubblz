@@ -2,90 +2,89 @@
 import { ref, onMounted, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import { useUserProfileStore } from '@/stores/user/profileStore'
+import { useVendorProfileStore } from '@/stores/vendor/profileStore'
 
-const profileStore = useUserProfileStore()
-const { profile } = storeToRefs(profileStore)
-const { getUserProfile } = profileStore
+const vendorStore = useVendorProfileStore()
+const { profiles } = storeToRefs(vendorStore)
+const {getVendorProfile} = vendorStore
 
 const form = ref({
   name: '',
-  email: '',
+  job: '',
   contact: '',
   image: null,
 })
 
 const errors = ref({
   name: '',
-  email: '',
+  job: '',
   contact: '',
 })
 
 const imagePreview = ref(null)
 
-const handleImageUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    form.value.image = file
-    imagePreview.value = URL.createObjectURL(file)
+onMounted(async () => {
+  await vendorStore.getVendorProfile()
+  if (vendorStore.profiles && vendorStore.profiles.user) {
+    form.value.name = vendorStore.profiles.user.name || ''
+    form.value.job = vendorStore.profiles.specialization || ''
+    form.value.contact = vendorStore.profiles.user.phone || ''
+    imagePreview.value = vendorStore.profiles.user.image_url || null
   }
-}
+})
 
 const validateForm = () => {
   let valid = true
-  errors.value = { name: '', email: '', contact: '' }
+  errors.value = { name: '', job: '', contact: '' }
 
   if (!form.value.name.trim()) {
     errors.value.name = 'Full name is required'
     valid = false
   }
 
-  if (!form.value.email.trim()) {
-    errors.value.email = 'email is required'
-    valid = false
-  }
-
-  if (!form.value.contact.trim()) {
-    errors.value.contact = 'Contact number is required'
+  if (!form.value.contact.match(/^\s\d{10}$/)) {
+    errors.value.contact = 'Enter valid contact number'
     valid = false
   }
 
   return valid
 }
 
-onMounted(async () => {
-  await getUserProfile()
-  const user = profile.value
-  if (user) {
-    form.value.name = user.name || ''
-    form.value.email = user.email || ''
-    form.value.contact = user.phone || ''
-    imagePreview.value = user.image_url ? user.image_url.replace(/\\/g, '/') : null
+const handleImageUpload = (e) => {
+  const file = e.target.files[0]
+  if (file) {
+    form.value.image = file
+    const reader = new FileReader()
+    reader.onload = () => {
+      imagePreview.value = reader.result
+    }
+    reader.readAsDataURL(file)
   }
-})
+}
 
 const handleSubmit = async () => {
   if (!validateForm()) return
 
   const formData = new FormData()
   formData.append('name', form.value.name)
-  formData.append('email', form.value.email)
+  formData.append('job', form.value.job)
   formData.append('contact', form.value.contact)
   if (form.value.image) {
     formData.append('image', form.value.image)
   }
 
   try {
-    await profileStore.updateUserProfile(2, formData)
-    alert('Profile updated successfully!')
+    await vendorStore.updateVendorProfile(formData)
+    alert('Profile updated successfully')
   } catch (err) {
-    alert('Failed to update profile.')
+    alert('Failed to update profile')
   }
 }
 </script>
 
 <template>
   <DefaultLayout class="md:px-40">
+    {{ profiles }}
     <div class="p-6 md:p-10">
       <h2 class="text-xl font-semibold mb-6">Edit Profile</h2>
 
@@ -118,14 +117,14 @@ const handleSubmit = async () => {
 
       <!-- Job Profile -->
       <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Email Id</label>
+        <label class="block text-sm font-medium text-gray-700">Job</label>
         <input
           type="text"
-          v-model="form.email"
+          v-model="form.job"
           class="w-full mt-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Enter Your Email Id"
+          placeholder="Enter Your Job"
         />
-        <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
+        <p v-if="errors.job" class="text-red-500 text-sm mt-1">{{ errors.job }}</p>
       </div>
 
       <!-- Contact -->

@@ -1,19 +1,21 @@
 <template>
   <div class="min-h-screen flex flex-col justify-center items-center px-4">
     <div class="w-full max-w-lg">
-    <div class="flex flex-col items-center mb-10">
-          <img src="/image/Bubbles.svg" alt="Bubble Logo" class="h-18 w-auto" />
-          <h1 class="text-5xl font-extrabold text-[#2076E2]">bubblz</h1>
-    </div>
-      <h2 class="text-2xl md:font-extrabold font-semibold text-start mb-6 text-gray-800">Welcome Back</h2>
+      <div class="flex flex-col items-center mb-10">
+        <img src="/image/Bubbles.svg" alt="Bubble Logo" class="h-18 w-auto" />
+        <h1 class="text-5xl font-extrabold text-[#2076E2]">bubblz</h1>
+      </div>
+      <h2 class="text-2xl md:font-extrabold font-semibold text-start mb-6 text-gray-800">
+        Welcome Back
+      </h2>
       <p class="text-sm text-gray-500 mb-4">
         Log in to continue booking and managing your services.
       </p>
-      <form>
+      <form @submit.prevent="handleLogin">
         <input
-          v-model="loginData.identifier"
+          v-model="loginData.email"
           type="text"
-          placeholder="Email or Phone"
+          placeholder="Email"
           class="w-full border rounded-md p-3 mb-6"
         />
         <div class="relative">
@@ -45,12 +47,18 @@
             >
               Forgot Password?
             </router-link>
-          </p>  
+          </p>
         </div>
 
-        <button class="w-full bg-[#2076E2] text-white py-2 rounded-md">
-          Login
+        <button
+          class="w-full bg-[#2076E2] text-white py-2 rounded-md"
+          type="submit"
+          :disabled="loginStore.loading"
+        >
+          <span v-if="loginStore.loading">Logging in...</span>
+          <span v-else>Login</span>
         </button>
+
         <p class="mt-2 text-md text-center">
           Create an account?
           <router-link to="/register" class="text-[#2076E2] hover:underline"
@@ -65,12 +73,33 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useLoginStore } from '@/stores/auth/login'
 
-const showPassword = ref(false)
 const router = useRouter()
+const showPassword = ref(false)
 
 const loginData = ref({
   identifier: '',
   password: '',
 })
+
+const loginStore = useLoginStore()
+
+const handleLogin = async () => {
+  const success = await loginStore.loginUser({
+    email: loginData.value.email,
+    password: loginData.value.password,
+  })
+
+  if (success) {
+    const role = loginStore.role || ''
+    if (role === 'employee') {
+      router.push('/vendor/dashboard')
+    } else {
+      router.push('/')
+    }
+  } else {
+    alert(loginStore.error || 'Login failed')
+  }
+}
 </script>

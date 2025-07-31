@@ -1,37 +1,47 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import { useUserProfileStore } from '@/stores/user/profileStore'
+import { useVendorProfileStore } from '@/stores/vendor/profileStore'
+import { storeToRefs } from 'pinia'
 
 const router = useRouter()
-const profileStore = useUserProfileStore()
 
-onMounted(() => {
-  profileStore.getUserProfile()
+const vendorProfile = useVendorProfileStore()
+const { profile } = storeToRefs(vendorProfile)
+const { getVendorProfile } = vendorProfile
+
+const user = ref({
+  name: '',
+  role: '',
+  image: '/image/profile-placeholder.jpg',
 })
 
-const user = computed(() => ({
-  name: profileStore.profile?.name,
-  role: profileStore.profile?.role,
-  image: profileStore.profile?.image,
-}))
-
-// Dynamic menu list
 const menuItems = ref([
-  { label: 'Booking History', icon: 'pi pi-stopwatch', route: '/booking-history' },
+  { label: 'Booking History', icon: 'pi pi-stopwatch', route: '/vendor/booking-history' },
   { label: 'Language Preference', icon: 'pi pi-language', route: '/user/language' },
-  { label: 'Change Password', icon: 'pi pi-lock', route: '/change-password' },
+  { label: 'Change Password', icon: 'pi pi-lock', route: '/vendor/change-password' },
   { label: 'Terms & Condition', icon: 'pi pi-question-circle', route: '/user/terms' },
   { label: 'Privacy Policy', icon: 'pi pi-address-book', route: '/user/privacy' },
   { label: 'Support', icon: 'pi pi-question', route: '/user/support' },
 ])
 
-const logout = () => {
-  localStorage.clear()
-  sessionStorage.clear()
-  router.push('/login')
+const handleLogout = () => {
+  router.push('/logout')
 }
+
+onMounted(async () => {
+  await getVendorProfile()
+
+  const current = profile.value?.items?.[0]
+  if (current && current.user) {
+    user.value.name = current.user.name || ''
+    user.value.role = current.specialization || 'Employee'
+    user.value.image = current.user.image_url
+      ? current.user.image_url
+      : '/image/profile-placeholder.jpg'
+  }
+})
 </script>
 
 <template>
@@ -41,7 +51,7 @@ const logout = () => {
       <div class="p-4">
         <div class="flex justify-between items-center mb-2">
           <h2 class="font-semibold text-lg">Profile</h2>
-          <router-link to="/editprofile" class="text-red-500 text-sm font-medium"
+          <router-link to="/vendor/editProfile" class="text-red-500 text-sm font-medium"
             >Edit Profile</router-link
           >
         </div>
@@ -71,7 +81,7 @@ const logout = () => {
 
       <!-- Logout -->
       <div class="mt-4 px-4">
-        <button @click="logout" class="text-red-500 font-semibold text-sm flex items-center gap-2">
+        <button @click="handleLogout" class="text-red-500 font-semibold text-sm flex items-center gap-2">
           <i class="pi pi-sign-out mr-2"></i>
           <span>Logout</span>
         </button>

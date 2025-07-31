@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex justify-center items-center bg-gray-50 px-4">
+  <div class="min-h-screen flex justify-center items-center bg-gray-50 md:px-4 px-4 py-4">
     <div class="w-full max-w-lg bg-white">
       <div class="flex flex-col items-center mb-10">
         <img src="/image/Bubbles.svg" alt="Bubble Logo" class="h-18 w-auto" />
@@ -25,10 +25,7 @@
           We never share your personal information.
         </p>
 
-        <button
-          type="submit"
-          class="w-full bg-[#2076E2] text-white py-2 rounded-md hover:bg-blue-700"
-        >
+        <button type="submit" class="w-full bg-[#2076E2] text-white py-2 rounded-md">
           Register Now
         </button>
 
@@ -44,13 +41,16 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useRegisterStore } from '@/stores/auth/register'
 
 const router = useRouter()
+const registerStore = useRegisterStore()
 
 const form = reactive({
   fullName: '',
   phone: '',
   email: '',
+  address: '',
   password: '',
   confirmPassword: '',
 })
@@ -61,6 +61,7 @@ const fields = [
   { key: 'fullName', placeholder: 'Full Name', type: 'text' },
   { key: 'phone', placeholder: 'Mobile Number', type: 'text' },
   { key: 'email', placeholder: 'Email Address', type: 'email' },
+  { key: 'address', placeholder: 'Address', type: 'text' },
   { key: 'password', placeholder: 'Create Password', type: 'password' },
   { key: 'confirmPassword', placeholder: 'Confirm Password', type: 'password' },
 ]
@@ -94,17 +95,24 @@ const validate = () => {
   return valid
 }
 
-const registerUser = () => {
-  if (validate()) {
-    const user = {
-      fullName: form.fullName,
-      phone: form.phone,
-      email: form.email,
-      password: form.password,
-    }
-    localStorage.setItem('registeredUser', JSON.stringify(user))
-    alert('Registered Successfully!')
+const registerUser = async () => {
+  if (!validate()) return
+
+  const userPayload = {
+    name: form.fullName,
+    phone: form.phone,
+    email: form.email,
+    address: form.address,
+    password: form.password,
+    confirm_password: form.confirmPassword,
+  }
+
+  const success = await registerStore.registerUser(userPayload)
+  if (success) {
+    alert('Registered successfully!')
     router.push('/login')
+  } else {
+    alert(registerStore.error || 'Registration failed')
   }
 }
 </script>

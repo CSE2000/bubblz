@@ -59,6 +59,51 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useForgetPasswordStore } from '@/stores/auth/forgetPassword'
+
+const router = useRouter()
+const identifier = ref('')
+const otp = ref(['', '', '', '', '', ''])
+
+const forgetPasswordStore = useForgetPasswordStore()
+
+function handleAction() {
+  if (!forgetPasswordStore.otpSent) {
+    if (!identifier.value) {
+      alert('Please enter email or phone.')
+      return
+    }
+
+    forgetPasswordStore.sendOTP(identifier.value).then((success) => {
+      if (success) {
+        alert('OTP Sent!')
+      } else {
+        alert(forgetPasswordStore.error)
+      }
+    })
+  } else {
+    const enteredOTP = otp.value.join('')
+    if (enteredOTP.length !== 6) {
+      alert('Please enter the complete 6-digit OTP.')
+      return
+    }
+
+    // Skipping OTP verification logic for now
+    router.push('/reset-password')
+  }
+}
+
+function focusNext(index) {
+  if (otp.value[index].length === 1 && index < 5) {
+    const next = document.querySelectorAll('input')[index + 1]
+    next?.focus()
+  }
+}
+</script>
+
+<!-- <script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const identifier = ref('')
@@ -90,4 +135,4 @@ function focusNext(index) {
     next.focus()
   }
 }
-</script>
+</script> -->

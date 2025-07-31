@@ -5,6 +5,9 @@ import { useServiceStore } from '@/stores/user/servicesStore'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { RouterLink } from 'vue-router'
 
+const showAllAdvantages = ref(false)
+const showAllDisadvantages = ref(false)
+
 const props = defineProps({
   id: String,
 })
@@ -69,12 +72,12 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Desktop Image Stack -->
-        <div class="hidden md:flex flex-col gap-4">
+        <div class="hidden md:flex flex-col">
           <img
             v-for="(img, i) in images"
             :key="i"
             :src="img"
-            class="w-full h-40 object-cover rounded-lg bg-gray-200"
+            class="w-full h-40 object-cover rounded-lg bg-gray-200 mb-4"
           />
         </div>
       </div>
@@ -100,33 +103,73 @@ onBeforeUnmount(() => {
 
         <!-- Advantages -->
         <div class="mt-4 space-y-2 text-sm">
-          <div class="flex items-start gap-2">
-            <i class="pi pi-check text-blue-500 text-xl"></i>
-            <!-- <span class="text-blue-500 text-xl">✔</span> -->
-            <p>{{ currentService.advantages }}</p>
+          <p class="text-xs font-medium text-[#686B78]">Service Included</p>
+          <div
+            v-for="(advantage, index) in currentService.advantages?.split(',') || []"
+            :key="index"
+            v-show="showAllAdvantages || index < 4"
+            class="flex items-start gap-2"
+          >
+            <img src="/image/bluetick.svg" alt="Check" class="w-5 h-5 text-blue-500" />
+            <p>{{ advantage.trim() }}</p>
           </div>
+          <button
+            v-if="currentService.advantages?.split(',').length > 4"
+            @click="showAllAdvantages = !showAllAdvantages"
+            class="text-blue-500 text-sm font-medium"
+          >
+            {{ showAllAdvantages ? 'See Less' : 'See More' }}
+          </button>
         </div>
 
         <!-- Book Button -->
         <RouterLink
           :to="`/book/${currentService.id}`"
-          class="mt-6 inline-block text-center w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-all"
+          class="mt-6 inline-block text-center w-full bg-[#2076E2] text-white font-semibold py-2 px-4 rounded-lg"
         >
           Book
         </RouterLink>
 
         <!-- Disadvantages -->
         <div class="mt-4 space-y-2 text-sm">
-          <div class="flex items-start gap-2">
-            <i class="pi pi-check text-red-500 text-lg"></i>
-            <!-- <span class="text-red-500 text-xl">⚠</span> -->
-            <p>{{ currentService.disadvantages }}</p>
+          <div
+            v-for="(disadvantage, index) in currentService.disadvantages?.split(',') || []"
+            :key="index"
+            v-show="showAllDisadvantages || index < 4"
+            class="flex items-start gap-2"
+          >
+            <img src="/image/redtick.svg" alt="Check" class="md:w-5 md:h-5 text-blue-500" />
+            <p>{{ disadvantage.trim() }}</p>
+          </div>
+          <button
+            v-if="currentService.disadvantages?.split(',').length > 4"
+            @click="showAllDisadvantages = !showAllDisadvantages"
+            class="text-blue-500 text-sm font-medium"
+          >
+            {{ showAllDisadvantages ? 'See Less' : 'See More' }}
+          </button>
+        </div>
+
+        <div class="mt-2 gap-4">
+          <strong class="font-semibold text-lg">Why Choose Us</strong>
+
+          <div class="flex items-center gap-2 mt-2">
+            <img src="/image/verfied.svg" alt="Verified" class="w-5 h-5" />
+            <p>Verified and experienced professionals</p>
+          </div>
+
+          <div class="flex items-center gap-2 mt-2">
+            <img src="/image/affordable.svg" alt="Affordable" class="w-5 h-5" />
+            <p>Affordable & transparent pricing</p>
+          </div>
+
+          <div class="flex items-center gap-2 mt-2">
+            <img src="/image/ontime.svg" alt="On-time" class="w-5 h-5" />
+            <p>On-time arrival and 100% satisfaction</p>
           </div>
         </div>
       </div>
     </div>
-
-    <div v-else class="text-center py-20 text-gray-600">Loading service details...</div>
   </DefaultLayout>
 </template>
 

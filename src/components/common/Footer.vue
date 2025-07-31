@@ -91,7 +91,7 @@
           <div>
             <p class="text-sm font-medium mb-2">Need Help?</p>
             <button
-              class="bg-[#2076E2] hover:bg-blue-700 text-white px-4 py-1.5 rounded-md text-sm font-semibold transition-colors w-full sm:w-auto"
+              class="bg-[#2076E2] text-white px-4 py-1.5 rounded-md text-sm font-semibold w-full sm:w-auto"
             >
               Connect us on Call
             </button>

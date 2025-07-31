@@ -1,47 +1,56 @@
+// stores/useBannerStore.js
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { makeRequest } from '@/request/request'
 
-export const useBannerStore = defineStore('bannerStore', () => {
+export const useBannerStore = defineStore('banner', () => {
   const banners = ref([])
   const loading = ref(false)
   const error = ref(null)
-  const pagination = ref({
-    page: 1,
-    pages: 1,
-    per_page: 20,
-    total: 0,
-  })
+  const pagination = ref({ page: 1, pages: 1, per_page: 20, total: 0 })
 
-  const getBanners = async (page = 1, per_page = 20) => {
+  const getBanners = async () => {
     loading.value = true
     error.value = null
 
     try {
-      const data = await makeRequest(`/banners?page=${page}&per_page=${per_page}`, 'GET')
-
-      // Store only the items array and filter active banners
-      banners.value = data.data.items.filter((banner) => banner.status === 'active')
-
-      // Store pagination info
-      pagination.value = {
-        page: data.data.page,
-        pages: data.data.pages,
-        per_page: data.data.per_page,
-        total: data.data.total,
+      const response = await makeRequest('/banners', 'GET')     
+      let data
+      if (response?.data?.data) {
+        data = response.data.data
+      } else if (response?.data) {
+        data = response.data
+      } else {
+        data = response
+      }
+      
+      if (data && data.items && Array.isArray(data.items)) {
+        banners.value = data.items
+        pagination.value = {
+          page: data.page || 1,
+          pages: data.pages || 1,
+          per_page: data.per_page || 20,
+          total: data.total || 0,
+        }
+      } else {
+        console.warn('Invalid data structure received:', data)
+        banners.value = []
+        error.value = 'Invalid response format'
       }
     } catch (err) {
-      console.error('Failed to load banners:', err)
-      error.value = err
+      console.error('Failed to fetch banners:', err)
+      error.value = err.message || 'Failed to fetch banners'
       banners.value = []
     } finally {
       loading.value = false
     }
   }
 
-  // Get active banners only
   const getActiveBanners = () => {
-    return banners.value.filter((banner) => banner.status === 'active')
+    return banners.value.filter(banner => banner.status === 'active')
+  }
+  const getBannerById = (id) => {
+    return banners.value.find(banner => banner.id === id)
   }
 
   return {
@@ -51,5 +60,6 @@ export const useBannerStore = defineStore('bannerStore', () => {
     pagination,
     getBanners,
     getActiveBanners,
+    getBannerById,
   }
 })

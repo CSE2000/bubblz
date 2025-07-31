@@ -1,63 +1,80 @@
 <template>
   <DefaultLayout class="md:px-40">
     <main class="p-4 max-w-md mx-auto">
-      <!-- Heading -->
-      <h2 class="text-lg font-semibold mb-4">Booking History</h2>
+      <h2 class="text-xl font-semibold mb-6">Booking History</h2>
+      <div v-if="loading" class="text-center text-sm text-gray-500">Loading...</div>
 
-      <!-- Booking Cards -->
-      <div v-for="(item, index) in filteredBookings" :key="index" class="mb-4">
-        <div class="flex justify-between items-center p-3 border-b border-gray-200">
-          <div class="flex items-center gap-3">
-            <img :src="item.image" alt="Client" class="w-12 h-12 rounded-full object-cover" />
+      <div
+        v-for="(item, index) in allBookings"
+        :key="index"
+        class="mb-6 overflow-hidden"
+      >
+        <!-- Header Section -->
+        <div class="p-4">
+          <div class="flex items-center space-x-4">
+            <div class="w-14 h-14 rounded-full bg-gray-200"></div>
+            <!-- <img
+              src="/image/profile-placeholder.jpg"
+              alt="Profile"
+              class="w-14 h-14 rounded-full object-cover"
+            /> -->
             <div>
-              <h3 class="font-semibold text-sm">{{ item.service }}</h3>
-              <p class="text-xs text-gray-600">{{ item.date }}</p>
-              <p class="text-xs text-gray-600">Client : {{ item.client }}</p>
+              <h3 class="text-md font-semibold">
+                {{ item.employee.name || 'Employee Not Assigned' }}
+              </h3>
+              <p class="text-sm text-gray-600">{{ formatDate(item.scheduled_date) }}</p>
+              <p class="text-sm text-gray-500">
+                Job profile :
+                {{ item.employee.specialization || 'Not Available' }}
+              </p>
             </div>
           </div>
-          <button class="bg-[#2076E2] text-white px-4 py-1 rounded-md text-sm">View</button>
+
+          <!-- Address Section -->
+          <div class="mt-4 flex items-start space-x-2">
+            <i class="pi pi-map-marker text-lg text-gray-600 ml-1 bg-gray-100 p-3 rounded-md"></i>
+            <div class="text-sm text-gray-700">{{ item.address || Null }}</div>
+          </div>
+        </div>
+
+        <!-- Service & Payment Section -->
+        <div class="p-4 space-y-4">
+          <div>
+            <h4 class="text-sm font-semibold mb-1">Service Done</h4>
+            <ul class="text-sm text-gray-700 list-decimal list-inside space-y-1">
+              <li>{{ item.service }}</li>
+              <li>Cleaning scheduled at {{ item.slot_time }}</li>
+              <li>Status: {{ item.booking_status }}</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-sm font-semibold mb-1">Payments</h4>
+            <p class="text-sm text-gray-700">Payable upon Completion</p>
+            <p class="text-sm font-semibold">Total Amount: ₹{{ item.total_price }}</p>
+          </div>
         </div>
       </div>
-
-      <!-- Done Button -->
-      <button class="w-full bg-[#2076E2] text-white py-2 rounded-md font-medium mt-6">Done</button>
     </main>
   </DefaultLayout>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import { useBookingStore } from '@/stores/user/bookingHistoryStore'
+import { storeToRefs } from 'pinia'
 
-const tab = ref('Completed')
+const store = useBookingStore()
+const { allBookings, loading } = storeToRefs(store)
 
-const bookings = ref([
-  {
-    service: 'Wardrobe Cleaning',
-    date: 'Saturday 9 July, 2025',
-    client: 'Seyyeeeeee',
-    image: '/image/avatar1.jpg',
-    status: 'Completed',
-  },
-  {
-    service: 'Wardrobe Cleaning',
-    date: 'Saturday 9 July, 2025',
-    client: 'Seyyeeeeee',
-    image: '/image/avatar1.jpg',
-    status: 'Completed',
-  },
-  {
-    service: 'Room Cleaning',
-    date: 'Sunday 10 July, 2025',
-    client: 'Another Client',
-    image: '/image/avatar2.jpg',
-    status: 'Current',
-  },
-])
 
-const filteredBookings = computed(() => bookings.value.filter((b) => b.status === tab.value))
+const formatDate = (datetime) => {
+  const date = new Date(datetime)
+  return date.toLocaleDateString(undefined, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
 </script>
-
-<style scoped>
-/* Optional: Add any specific styles here */
-</style>

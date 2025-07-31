@@ -16,15 +16,7 @@ function goToVendorDetails() {
 
 // Store
 const serviceStore = useServiceStore()
-const { allServices } = storeToRefs(serviceStore)
-const { getAllServices } = serviceStore
-
-onMounted(() => {
-  getAllServices()
-})
-
-// Use first service from API if available
-const service = computed(() => allServices.value?.[0] || null)
+// const { allServices } = storeToRefs(serviceStore)
 </script>
 
 <template>
@@ -35,13 +27,16 @@ const service = computed(() => allServices.value?.[0] || null)
     <!-- Left Content -->
     <div class="flex-1">
       <div class="flex items-center gap-2 mb-1">
-        <span class="bg-blue-600 text-white text-xs font-semibold px-2 py-0.5 rounded">
-          RECOMMENDED
+        <span
+          class="text-white text-xs font-semibold px-2 py-0.5 rounded"
+          :style="{ backgroundColor: service?.color || '#3B82F6' }"
+        >
+          {{ service?.tag?.toUpperCase() }}
         </span>
       </div>
 
       <h2 class="font-semibold text-base text-gray-800 mb-1">
-        {{ service?.name || 'Interior+Exterior Car Wash' }}
+        {{ service?.name }}
       </h2>
 
       <ul class="text-sm text-gray-600 list-disc ml-5 space-y-0.5 mb-2">

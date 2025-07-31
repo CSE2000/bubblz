@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { usePasswordStore } from '@/stores/vendor/passwordUpdate'
 import { storeToRefs } from 'pinia'
@@ -54,10 +54,9 @@ const validateForm = () => {
 
 const handleSubmit = async () => {
   if (validateForm()) {
-    const user = JSON.parse(localStorage.getItem('user') || '{}')
     const payload = {
-      current_password: form.value.currentPassword,
-      new_password: form.value.newPassword,
+      currentPassword: form.value.currentPassword,
+      newPassword: form.value.newPassword,
       confirm_password: form.value.confirmPassword,
     }
     await passwordStore.updatePassword(payload)

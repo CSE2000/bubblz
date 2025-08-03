@@ -111,7 +111,7 @@ export const useBookingStore = defineStore('bookingStore', () => {
     }
   }
 
-  // Add or update an alternate number
+  // Add alternate number
   const addAlternateNumber = async (number) => {
     try {
       const payload = { alternate_number: number }
@@ -155,55 +155,3 @@ export const useBookingStore = defineStore('bookingStore', () => {
     allBookings,
   }
 })
-// import { ref } from 'vue'
-// import { makeRequest } from '@/request/request'
-
-// export const useBookingStore = defineStore('bookingStore', () => {
-//   const bookingSuccess = ref(false)
-//   const bookingError = ref(null)
-//   const loading = ref(false)
-//   const lastBooking = ref(null)
-
-//   const createBooking = async ({ service_id, employee_id, scheduled_date, slot_time }) => {
-//     loading.value = true
-//     bookingError.value = null
-
-//     try {
-//       const response = await makeRequest('/bookings', 'POST', {
-//         service_id,
-//         employee_id,
-//         scheduled_date,
-//         slot_time,
-//       })
-//       bookingSuccess.value = true
-//       lastBooking.value = response?.data
-//     } catch (err) {
-//       console.error('Booking failed:', err)
-//       bookingError.value = err
-//     } finally {
-//       loading.value = false
-//     }
-//   }
-
-//   const addCar = async ({ brand, registration_number }) => {
-//     try {
-//       const response = await makeRequest('/cars', 'POST', {
-//         brand,
-//         registration_number,
-//       })
-//       return response?.data
-//     } catch (err) {
-//       console.error('Add car failed:', err)
-//       throw err
-//     }
-//   }
-
-//   return {
-//     bookingSuccess,
-//     bookingError,
-//     loading,
-//     createBooking,
-//     addCar,
-//     lastBooking,
-//   }
-// })

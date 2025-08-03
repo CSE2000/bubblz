@@ -2,8 +2,7 @@
   <div class="min-h-screen flex items-center justify-center px-4">
     <div class="max-w-lg w-full bg-white md:p-6 p-2">
       <div class="flex flex-col items-center mb-10">
-        <img src="/image/Bubbles.svg" alt="Bubble Logo" class="h-18 w-auto" />
-        <h1 class="text-5xl font-extrabold text-[#2076E2]">bubblz</h1>
+        <img src="/public/image/Bubblz_logo.png" alt="logo" class="h-auto w-full" />
       </div>
       <h2 class="text-2xl font-semibold text-start mb-2 text-gray-800">Forgot Password</h2>
       <p class="text-xs text-gray-600 mb-4">
@@ -43,8 +42,8 @@
             ></i>
             Didn't receive the code? Check your spam folder or
             <span class="text-[#2076E2] hover:underline cursor-pointer" @click="resendOTP">
-              Try Again
-            </span>.
+              Try Again </span
+            >.
           </p>
         </div>
 
@@ -53,7 +52,7 @@
           type="submit"
           :disabled="loading"
         >
-          {{ loading ? 'Processing...' : (otpSent ? 'Confirm OTP' : 'Send OTP') }}
+          {{ loading ? 'Processing...' : otpSent ? 'Confirm OTP' : 'Send OTP' }}
         </button>
       </form>
     </div>
@@ -77,9 +76,9 @@ const otpSent = computed(() => forgetPasswordStore.otpSent)
 
 async function handleAction() {
   if (loading.value) return
-  
+
   loading.value = true
-  
+
   try {
     if (!otpSent.value) {
       // Send OTP
@@ -133,13 +132,13 @@ function focusNext(index) {
 
 async function resendOTP() {
   if (loading.value) return
-  
+
   loading.value = true
-  
+
   try {
     // Reset OTP inputs
     otp.value = ['', '', '', '', '', '']
-    
+
     const success = await forgetPasswordStore.sendOTP(email.value)
     if (success) {
       alert('OTP Resent!')

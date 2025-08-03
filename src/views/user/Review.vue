@@ -1,45 +1,3 @@
-<script setup>
-import { ref, computed } from 'vue'
-import { useReviewStore } from '@/stores/user/reviewStore'
-import { useRoute } from 'vue-router'
-
-const route = useRoute()
-
-const reviewStore = useReviewStore()
-
-const rating = ref(0)
-const hoverRating = ref(0)
-const reviewText = ref('')
-const photos = ref([])
-const photoFiles = ref([]) // actual File objects
-
-const maxChars = 400
-const remainingChars = computed(() => maxChars - reviewText.value.length)
-
-const handleFileUpload = (e) => {
-  const files = e.target.files
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i]
-    photoFiles.value.push(file)
-    photos.value.push(URL.createObjectURL(file)) // preview
-  }
-}
-
-const setRating = (value) => {
-  rating.value = value
-}
-
-const handleSubmit = async () => {
-  await reviewStore.submitReview({
-    booking_id: 'id',
-    rating: rating.value,
-    message: reviewText.value,
-    files: photoFiles.value,
-  })
-}
-const bookingId = route.params.id
-</script>
-
 <template>
   <div class="p-4 md:p-8 max-w-2xl mx-auto space-y-6 bg-white rounded-lg shadow">
     <!-- 1. Give Ratings -->
@@ -114,3 +72,45 @@ const bookingId = route.params.id
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useReviewStore } from '@/stores/user/reviewStore'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const reviewStore = useReviewStore()
+
+const rating = ref(0)
+const hoverRating = ref(0)
+const reviewText = ref('')
+const photos = ref([])
+const photoFiles = ref([]) // actual File objects
+
+const maxChars = 400
+const remainingChars = computed(() => maxChars - reviewText.value.length)
+
+const handleFileUpload = (e) => {
+  const files = e.target.files
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i]
+    photoFiles.value.push(file)
+    photos.value.push(URL.createObjectURL(file)) // preview
+  }
+}
+
+const setRating = (value) => {
+  rating.value = value
+}
+
+const handleSubmit = async () => {
+  await reviewStore.submitReview({
+    booking_id: 'id',
+    rating: rating.value,
+    message: reviewText.value,
+    files: photoFiles.value,
+  })
+}
+const bookingId = route.params.id
+</script>

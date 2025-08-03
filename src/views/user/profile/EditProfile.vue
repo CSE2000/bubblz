@@ -1,91 +1,5 @@
-<script setup>
-import { ref, onMounted, computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import { useUserProfileStore } from '@/stores/user/profileStore'
-
-const profileStore = useUserProfileStore()
-const { profile } = storeToRefs(profileStore)
-const { getUserProfile } = profileStore
-
-const form = ref({
-  name: '',
-  email: '',
-  contact: '',
-  image: null,
-})
-
-const errors = ref({
-  name: '',
-  email: '',
-  contact: '',
-})
-
-const imagePreview = ref(null)
-
-const handleImageUpload = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    form.value.image = file
-    imagePreview.value = URL.createObjectURL(file)
-  }
-}
-
-const validateForm = () => {
-  let valid = true
-  errors.value = { name: '', email: '', contact: '' }
-
-  if (!form.value.name.trim()) {
-    errors.value.name = 'Full name is required'
-    valid = false
-  }
-
-  if (!form.value.email.trim()) {
-    errors.value.email = 'email is required'
-    valid = false
-  }
-
-  if (!form.value.contact.trim()) {
-    errors.value.contact = 'Contact number is required'
-    valid = false
-  }
-
-  return valid
-}
-
-onMounted(async () => {
-  await getUserProfile()
-  const user = profile.value
-  if (user) {
-    form.value.name = user.name || ''
-    form.value.email = user.email || ''
-    form.value.contact = user.phone || ''
-    imagePreview.value = user.image_url ? user.image_url.replace(/\\/g, '/') : null
-  }
-})
-
-const handleSubmit = async () => {
-  if (!validateForm()) return
-
-  const formData = new FormData()
-  formData.append('name', form.value.name)
-  formData.append('email', form.value.email)
-  formData.append('contact', form.value.contact)
-  if (form.value.image) {
-    formData.append('image', form.value.image)
-  }
-
-  try {
-    await profileStore.updateUserProfile(2, formData)
-    alert('Profile updated successfully!')
-  } catch (err) {
-    alert('Failed to update profile.')
-  }
-}
-</script>
-
 <template>
-  <DefaultLayout class="md:px-40">
+  <DefaultLayout>
     <div class="p-6 md:p-10">
       <h2 class="text-xl font-semibold mb-6">Edit Profile</h2>
 
@@ -130,14 +44,14 @@ const handleSubmit = async () => {
 
       <!-- Contact -->
       <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700">Contact Number</label>
+        <label class="block text-sm font-medium text-gray-700">Phone Number</label>
         <input
           type="text"
-          v-model="form.contact"
+          v-model="form.phone"
           class="w-full mt-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="+91 3456787654"
         />
-        <p v-if="errors.contact" class="text-red-500 text-sm mt-1">{{ errors.contact }}</p>
+        <p v-if="errors.phone" class="text-red-500 text-sm mt-1">{{ errors.phone }}</p>
       </div>
 
       <!-- Submit Button -->
@@ -147,3 +61,89 @@ const handleSubmit = async () => {
     </div>
   </DefaultLayout>
 </template>
+
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import { useUserProfileStore } from '@/stores/user/profileStore'
+
+const profileStore = useUserProfileStore()
+const { profile } = storeToRefs(profileStore)
+const { getUserProfile } = profileStore
+
+const form = ref({
+  name: '',
+  email: '',
+  phone: '',
+  image: null,
+})
+
+const errors = ref({
+  name: '',
+  email: '',
+  phone: '',
+})
+
+const imagePreview = ref(null)
+
+const handleImageUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    form.value.image = file
+    imagePreview.value = URL.createObjectURL(file)
+  }
+}
+
+const validateForm = () => {
+  let valid = true
+  errors.value = { name: '', email: '', phone: '' }
+
+  if (!form.value.name.trim()) {
+    errors.value.name = 'Full name is required'
+    valid = false
+  }
+
+  if (!form.value.email.trim()) {
+    errors.value.email = 'email is required'
+    valid = false
+  }
+
+  if (!form.value.phone.trim()) {
+    errors.value.phone = 'Phone number is required'
+    valid = false
+  }
+
+  return valid
+}
+
+onMounted(async () => {
+  await getUserProfile()
+  const user = profile.value
+  if (user) {
+    form.value.name = user.name || ''
+    form.value.email = user.email || ''
+    form.value.phone = user.phone || ''
+    imagePreview.value = user.image_url ? user.image_url.replace(/\\/g, '/') : null
+  }
+})
+
+const handleSubmit = async () => {
+  if (!validateForm()) return
+
+  const formData = new FormData()
+  formData.append('name', form.value.name)
+  formData.append('email', form.value.email)
+  formData.append('phone', form.value.phone)
+  if (form.value.image) {
+    formData.append('image', form.value.image)
+  }
+  try {
+    await profileStore.updateUserProfile(formData)
+    alert('Profile updated successfully!')
+  } catch (err) {
+    console.error(err)
+    alert('Failed to update profile.')
+  }
+}
+</script>

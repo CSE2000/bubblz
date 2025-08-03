@@ -1,14 +1,20 @@
 <template>
-  <DefaultLayout class="px-40">
+  <DefaultLayout>
     <div class="min-h-screen bg-white p-4 mx-auto space-y-6">
       <h2 class="text-lg font-semibold">Complete Job</h2>
 
       <!-- Success/Error Messages -->
-      <div v-if="jobDoneStore.success" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+      <div
+        v-if="jobDoneStore.success"
+        class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded"
+      >
         {{ jobDoneStore.success }}
       </div>
-      
-      <div v-if="jobDoneStore.error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+
+      <div
+        v-if="jobDoneStore.error"
+        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"
+      >
         {{ jobDoneStore.error }}
       </div>
 
@@ -73,11 +79,7 @@
           class="flex items-center justify-between px-4 py-2 text-sm"
         >
           <span>{{ task.label }}</span>
-          <input 
-            type="checkbox" 
-            v-model="form.tasks[task.key]" 
-            :disabled="jobDoneStore.loading"
-          />
+          <input type="checkbox" v-model="form.tasks[task.key]" :disabled="jobDoneStore.loading" />
         </div>
       </div>
 
@@ -101,11 +103,16 @@
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import { reactive, computed, onUnmounted } from 'vue'
 import { useUploadJobStore } from '@/stores/vendor/jobDoneStore'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
+const bookingId = route.query.booking_id
 
 const jobDoneStore = useUploadJobStore()
 
 const taskList = [
-  { label: 'Job Completed as per Client\'s request', key: 'completed' },
+  { label: "Job Completed as per Client's request", key: 'completed' },
   { label: 'All material and Tools Cleaned Up', key: 'cleaned' },
   { label: 'Client Satisfied with the Service', key: 'satisfied' },
 ]
@@ -116,12 +123,12 @@ const form = reactive({
     cleaned: false,
     satisfied: false,
   },
-  photos: [], // { file: File, preview: URL }
+  photos: [],
 })
 
 // Computed property to check if form can be submitted
 const canSubmit = computed(() => {
-  const allTasksCompleted = Object.values(form.tasks).every(task => task === true)
+  const allTasksCompleted = Object.values(form.tasks).every((task) => task === true)
   const hasPhotos = form.photos.length > 0
   return allTasksCompleted && hasPhotos
 })
@@ -134,7 +141,7 @@ const handleFileUpload = (e) => {
       alert('Please select only image files')
       return
     }
-    
+
     // Validate file size (e.g., max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('File size should be less than 5MB')
@@ -144,8 +151,6 @@ const handleFileUpload = (e) => {
     const preview = URL.createObjectURL(file)
     form.photos.push({ file, preview })
   })
-  
-  // Clear the input value to allow re-uploading the same file
   e.target.value = ''
 }
 
@@ -155,10 +160,8 @@ const removePhoto = (index) => {
 }
 
 const submitForm = async () => {
-  // Clear previous messages
   jobDoneStore.clearMessages()
 
-  // Validate form
   if (!canSubmit.value) {
     alert('Please complete all tasks and upload at least one photo')
     return
@@ -166,51 +169,27 @@ const submitForm = async () => {
 
   try {
     const formData = new FormData()
-    
-    // Append photos
-    form.photos.forEach((item, i) => {
+    form.photos.forEach((item) => {
       formData.append('image', item.file)
     })
-    
-    // Append task completion data
+
     Object.entries(form.tasks).forEach(([key, value]) => {
       formData.append(key, value)
     })
 
-    // Call store method
+    formData.append('booking_id', bookingId)
+
+    // Submit the request
     const response = await jobDoneStore.uploadJobImages(formData)
-    
+    router.push('/vendor/dashboard')
     console.log('Form submitted successfully:', response)
-    
-    // Optional: Reset form after successful submission
-    // resetForm()
-    
   } catch (error) {
     console.error('Submission failed:', error)
   }
 }
 
-const resetForm = () => {
-  // Clear photos and revoke URLs
-  form.photos.forEach(photo => {
-    URL.revokeObjectURL(photo.preview)
-  })
-  
-  // Reset form data
-  form.photos = []
-  form.tasks = {
-    completed: false,
-    cleaned: false,
-    satisfied: false,
-  }
-  
-  // Clear store messages
-  jobDoneStore.clearMessages()
-}
-
-// Cleanup URLs when component unmounts
 onUnmounted(() => {
-  form.photos.forEach(photo => {
+  form.photos.forEach((photo) => {
     URL.revokeObjectURL(photo.preview)
   })
 })

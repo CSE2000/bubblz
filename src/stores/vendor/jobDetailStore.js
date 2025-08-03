@@ -36,3 +36,4 @@ export const useJobDetailStore = defineStore('jobDetail', () => {
     fetchJobDetail,
   }
 })
+

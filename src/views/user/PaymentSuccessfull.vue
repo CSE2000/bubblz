@@ -48,18 +48,21 @@
 
       <!-- Buttons -->
       <div class="mt-6 space-y-3">
-        <router-link
-          :to="`/booking-tracking/${bookingDetails.id}`"
-          class="w-full bg-[#2076E2] text-white py-2 rounded-lg font-medium cursor-pointer hover:bg-blue-700 transition"
-        >
-          Track Booking
-        </router-link>
-        <router-link
-          to="/"
-          class="w-full text-gray-500 py-2 font-medium transition hover:text-gray-700"
-        >
-          Back to Home
-        </router-link>
+        <div class="flex flex-col space-y-2 w-full">
+          <router-link
+            :to="`/booking-tracking/${bookingDetails.id}`"
+            class="w-full bg-[#2076E2] text-white py-2 rounded-lg font-medium cursor-pointer hover:bg-blue-700 transition text-center"
+          >
+            Track Booking
+          </router-link>
+
+          <router-link
+            to="/"
+            class="w-full text-gray-500 py-2 font-medium transition hover:text-gray-700 text-center"
+          >
+            Back to Home
+          </router-link>
+        </div>
       </div>
     </div>
 

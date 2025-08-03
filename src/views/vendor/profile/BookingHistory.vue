@@ -1,5 +1,5 @@
 <template>
-  <DefaultLayout class="md:px-40">
+  <DefaultLayout>
     <main class="p-4 max-w-md mx-auto">
       <h2 class="text-lg font-semibold mb-4">Booking History</h2>
 

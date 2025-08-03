@@ -1,5 +1,5 @@
 <template>
-  <DefaultLayout class="md:px-40">
+  <DefaultLayout>
     <div class="space-y-6 mx-auto md:pb-8 pb-4">  <!-- max-w-2x l -->
       <!-- Client Info -->
       <section class="bg-white rounded-lg shadow p-4 space-y-4">

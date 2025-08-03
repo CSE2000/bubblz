@@ -2,8 +2,7 @@
   <div class="min-h-screen flex justify-center items-center bg-gray-50 md:px-4 px-4 py-4">
     <div class="w-full max-w-lg bg-white">
       <div class="flex flex-col items-center mb-10">
-        <img src="/image/Bubbles.svg" alt="Bubble Logo" class="h-18 w-auto" />
-        <h1 class="text-5xl font-extrabold text-[#2076E2]">bubblz</h1>
+        <img src="/public/image/Bubblz_logo.png" alt="logo" class="h-auto w-full" />
       </div>
       <h2 class="text-2xl font-semibold text-start text-gray-800 mb-3">Create Your Account</h2>
       <p class="mb-2 text-gray-500 text-xs font-medium">

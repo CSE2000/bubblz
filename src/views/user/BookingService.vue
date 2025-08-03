@@ -1,5 +1,5 @@
 <template>
-  <DefaultLayout class="min-h-screen md:px-28 lg:px-64">
+  <DefaultLayout>
     <div class="p-4 md:p-6">
       <!-- Your Cart -->
       <div>
@@ -16,9 +16,9 @@
               <p class="text-sm font-semibold">₹{{ item.offer_price }}</p>
             </div>
           </div>
-          <button @click="removeItem(item.id)" class="text-red-500 text-xl font-bold">
+          <!-- <button @click="removeItem(item.id)" class="text-red-500 text-xl font-bold">
             <i class="pi pi-trash"></i>
-          </button>
+          </button> -->
         </div>
       </div>
 
@@ -72,6 +72,15 @@
           <span>Service Charge</span>
           <span>₹{{ serviceCharge }}</span>
         </div>
+
+        <div v-if="appliedCoupon" class="flex justify-between mb-1 text-green-600">
+          <span>Coupon ({{ appliedCoupon.code }})</span>
+          <div class="flex items-center gap-2">
+            <span>-₹{{ couponDiscount }}</span>
+            <button @click="removeCoupon" class="text-red-500 text-xs">✕</button>
+          </div>
+        </div>
+
         <div class="flex justify-between mb-1">
           <span>Estimated Time</span>
           <span>30 min</span>
@@ -81,11 +90,12 @@
           <span>₹{{ toPay }}</span>
         </div>
       </div>
+
       <!-- Address and Details -->
       <div class="mt-4 text-sm space-y-4">
         <div>
           <p class="font-semibold"><i class="pi pi-car mr-2 text-black font-bold"></i>Vehicle</p>
-          <p>{{ vehicle?.name }}<br />Reg No - {{ vehicle?.regNo }}</p>
+          <p>{{ vehicle.name }}<br />Reg No - {{ vehicle.regNo }}</p>
 
           <button
             @click="vehicleModal = true"
@@ -117,10 +127,10 @@
             <i class="pi pi-address-book mr-2 text-black font-semibold"></i> Contact
           </p>
           <p>{{ contact.name }}</p>
-            <p>
+          <p>
             <i class="pi pi-phone mr-2 text-black font-bold"></i>
             {{ contact.numbers.join(', ') }}
-            </p>
+          </p>
 
           <button
             @click="contactModal = true"
@@ -335,11 +345,11 @@ onMounted(async () => {
     bookingStore.getCars(),
     bookingStore.getAddresses(),
     bookingStore.getAlternateNumbers(),
-    userProfileStore.getUserProfile(), // Add this line
+    userProfileStore.getUserProfile(),
   ])
   // Set the latest car
   if (userCars.value.length > 0) {
-    latestCar = [...userCars.value].sort(
+    const latestCar = [...userCars.value].sort(
       (a, b) => new Date(b.created_at) - new Date(a.created_at),
     )[0]
     vehicle.value = {
@@ -393,12 +403,15 @@ const serviceCharge = computed(() =>
   selectedServices.value.reduce((sum, item) => sum + Number(item.service_charge || 0), 0),
 )
 
-const toPay = computed(() => itemTotal.value + serviceCharge.value)
+const toPay = computed(() => {
+  const total = itemTotal.value + serviceCharge.value - couponDiscount.value
+  return Math.max(total, 0)
+})
 
 // Vehicle
 const vehicle = ref({
-  name: 'Hyundai Creta - White',
-  regNo: 'OD 04 D 4644',
+  name: '',
+  regNo: '',
 })
 
 // Address
@@ -459,6 +472,7 @@ const addVehicle = async () => {
       regNo: registration_number.value,
     }
 
+    await bookingStore.getCars()
     alert('Car added successfully!')
     brand.value = ''
     registration_number.value = ''
@@ -514,10 +528,47 @@ const addContact = async () => {
   }
 }
 
+// coupon
+const appliedCoupon = ref(null)
+const couponDiscount = ref(0)
+
+// Add coupon validation data
+const availableCoupons = {
+  SAVE10: { discount: 10, type: 'percentage' },
+  FLAT50: { discount: 50, type: 'fixed' },
+  WELCOME20: { discount: 20, type: 'percentage' },
+  FIRST100: { discount: 100, type: 'fixed' },
+}
+
+// Replace the applyCoupon function
 const applyCoupon = () => {
-  if (couponCode.value === 'DISCOUNT50') {
-    discountApplied.value = true
+  const coupon = availableCoupons[couponCode.value.toUpperCase()]
+
+  if (coupon) {
+    appliedCoupon.value = {
+      code: couponCode.value.toUpperCase(),
+      ...coupon,
+    }
+
+    if (coupon.type === 'percentage') {
+      couponDiscount.value = Math.round((itemTotal.value * coupon.discount) / 100)
+    } else {
+      couponDiscount.value = coupon.discount
+    }
+
+    alert(`Coupon applied! You saved ₹${couponDiscount.value}`)
+  } else {
+    appliedCoupon.value = null
+    couponDiscount.value = 0
+    alert('Invalid coupon code')
   }
+}
+
+// Add remove coupon function
+const removeCoupon = () => {
+  appliedCoupon.value = null
+  couponDiscount.value = 0
+  couponCode.value = ''
 }
 
 const handlePayment = async () => {
@@ -534,9 +585,8 @@ const handlePayment = async () => {
   try {
     const payload = {
       service_id: selectedServices.value[0]?.id || 1,
-      employee_id: 2, // Replace with dynamic value if available
-      scheduled_date: new Date().toISOString().split('T')[0], // e.g., 2025-08-01
-      slot_time: selectedSlot.value.replace(' ', ''), // format: "10:00-11:00"
+      scheduled_date: new Date().toISOString().split('T')[0],
+      slot_time: selectedSlot.value.replace(' ', ''),
     }
 
     const res = await bookingStore.createBooking(payload)

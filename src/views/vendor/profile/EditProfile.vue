@@ -1,90 +1,6 @@
-<script setup>
-import { ref, onMounted, computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import { useVendorProfileStore } from '@/stores/vendor/profileStore'
-
-const vendorStore = useVendorProfileStore()
-const { profiles } = storeToRefs(vendorStore)
-const {getVendorProfile} = vendorStore
-
-const form = ref({
-  name: '',
-  job: '',
-  contact: '',
-  image: null,
-})
-
-const errors = ref({
-  name: '',
-  job: '',
-  contact: '',
-})
-
-const imagePreview = ref(null)
-
-onMounted(async () => {
-  await vendorStore.getVendorProfile()
-  if (vendorStore.profiles && vendorStore.profiles.user) {
-    form.value.name = vendorStore.profiles.user.name || ''
-    form.value.job = vendorStore.profiles.specialization || ''
-    form.value.contact = vendorStore.profiles.user.phone || ''
-    imagePreview.value = vendorStore.profiles.user.image_url || null
-  }
-})
-
-const validateForm = () => {
-  let valid = true
-  errors.value = { name: '', job: '', contact: '' }
-
-  if (!form.value.name.trim()) {
-    errors.value.name = 'Full name is required'
-    valid = false
-  }
-
-  if (!form.value.contact.match(/^\s\d{10}$/)) {
-    errors.value.contact = 'Enter valid contact number'
-    valid = false
-  }
-
-  return valid
-}
-
-const handleImageUpload = (e) => {
-  const file = e.target.files[0]
-  if (file) {
-    form.value.image = file
-    const reader = new FileReader()
-    reader.onload = () => {
-      imagePreview.value = reader.result
-    }
-    reader.readAsDataURL(file)
-  }
-}
-
-const handleSubmit = async () => {
-  if (!validateForm()) return
-
-  const formData = new FormData()
-  formData.append('name', form.value.name)
-  formData.append('job', form.value.job)
-  formData.append('contact', form.value.contact)
-  if (form.value.image) {
-    formData.append('image', form.value.image)
-  }
-
-  try {
-    await vendorStore.updateVendorProfile(formData)
-    alert('Profile updated successfully')
-  } catch (err) {
-    alert('Failed to update profile')
-  }
-}
-</script>
-
 <template>
   <DefaultLayout class="md:px-40">
-    {{ profiles }}
+    <!-- {{ profiles }} -->
     <div class="p-6 md:p-10">
       <h2 class="text-xl font-semibold mb-6">Edit Profile</h2>
 
@@ -127,16 +43,16 @@ const handleSubmit = async () => {
         <p v-if="errors.job" class="text-red-500 text-sm mt-1">{{ errors.job }}</p>
       </div>
 
-      <!-- Contact -->
+      <!-- phone -->
       <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700">Contact Number</label>
+        <label class="block text-sm font-medium text-gray-700">Phone Number</label>
         <input
           type="text"
-          v-model="form.contact"
+          v-model="form.phone"
           class="w-full mt-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="+91 3456787654"
         />
-        <p v-if="errors.contact" class="text-red-500 text-sm mt-1">{{ errors.contact }}</p>
+        <p v-if="errors.phone" class="text-red-500 text-sm mt-1">{{ errors.phone }}</p>
       </div>
 
       <!-- Submit Button -->
@@ -146,3 +62,86 @@ const handleSubmit = async () => {
     </div>
   </DefaultLayout>
 </template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import { useVendorProfileStore } from '@/stores/vendor/profileStore'
+import { storeToRefs } from 'pinia'
+
+const vendorStore = useVendorProfileStore()
+const { profiles } = storeToRefs(vendorStore)
+
+const form = ref({
+  name: '',
+  job: '',
+  phone: '',
+  image: null,
+})
+
+const errors = ref({
+  name: '',
+  job: '',
+  phone: '',
+})
+
+onMounted(async () => {
+  await vendorStore.getVendorProfile()
+
+  // Load first employee profile from items array safely
+  const current = profiles.value?.items?.[0]
+
+  if (current && current.user) {
+    form.value.name = current.user.name || ''
+    form.value.job = current.specialization || ''
+    form.value.phone = current.user.phone || ''
+    imagePreview.value = user.image_url ? user.image_url.replace(/\\/g, '/') : null
+  }
+})
+
+const validateForm = () => {
+  let valid = true
+  errors.value = { name: '', job: '', phone: '' }
+
+  if (!form.value.name.trim()) {
+    errors.value.name = 'Full name is required'
+    valid = false
+  }
+  if (!form.value.phone.trim() || !/^\+?\d{7,15}$/.test(form.value.phone.replace(/\s+/g, ''))) {
+    errors.value.phone = 'Enter valid phone number'
+    valid = false
+  }
+
+  return valid
+}
+
+const imagePreview = ref(null)
+
+const handleImageUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    form.value.image = file
+    imagePreview.value = URL.createObjectURL(file)
+  }
+}
+
+const handleSubmit = async () => {
+  if (!validateForm()) return
+
+  const formData = new FormData()
+  formData.append('name', form.value.name)
+  formData.append('specialization', form.value.job)
+  formData.append('phone', form.value.phone)
+  if (form.value.image) {
+    formData.append('image', form.value.image)
+  }
+
+  try {
+    await vendorStore.updateVendorProfile(formData)
+    await vendorStore.getVendorProfile()
+    alert('Profile updated successfully')
+  } catch (err) {
+    alert('Failed to update profile')
+  }
+}
+</script>

@@ -1,5 +1,5 @@
 <template>
-  <DefaultLayout class="md:px-40">
+  <DefaultLayout>
     <main class="p-4 max-w-md mx-auto">
       <h2 class="text-xl font-semibold mb-6">Booking History</h2>
       <div v-if="loading" class="text-center text-sm text-gray-500">Loading...</div>

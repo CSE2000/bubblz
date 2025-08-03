@@ -2,8 +2,7 @@
   <div class="min-h-screen flex items-center justify-center px-4">
     <div class="max-w-lg w-full bg-white md:p-6 p-2">
       <div class="flex flex-col items-center mb-10">
-        <img src="/image/Bubbles.svg" alt="Bubble Logo" class="h-18 w-auto" />
-        <h1 class="text-5xl font-extrabold text-[#2076E2]">bubblz</h1>
+        <img src="/public/image/Bubblz_logo.png" alt="logo" class="h-auto w-full" />
       </div>
       <h2 class="text-2xl font-semibold text-start mb-2 text-gray-800">Forgot Password</h2>
       <p class="text-xs text-gray-600 mb-4">
@@ -57,28 +56,36 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useForgetPasswordStore } from '@/stores/auth/forgetPassword'
+import { storeToRefs } from 'pinia'
 
 const router = useRouter()
+const store = useForgetPasswordStore()
+
+const { otpSent, error } = storeToRefs(store)
+
 const identifier = ref('')
 const otp = ref(['', '', '', '', '', ''])
 
-const forgetPasswordStore = useForgetPasswordStore()
+watch(otp, (newVal) => {
+  store.otp = newVal.join('')
+})
 
 function handleAction() {
-  if (!forgetPasswordStore.otpSent) {
+  if (!store.otpSent) {
     if (!identifier.value) {
       alert('Please enter email or phone.')
       return
     }
 
-    forgetPasswordStore.sendOTP(identifier.value).then((success) => {
+    store.sendOTP(identifier.value).then((success) => {
       if (success) {
         alert('OTP Sent!')
+        store.email = identifier.value
       } else {
-        alert(forgetPasswordStore.error)
+        alert(store.error)
       }
     })
   } else {
@@ -88,7 +95,11 @@ function handleAction() {
       return
     }
 
-    // Skipping OTP verification logic for now
+    // Store email and otp in localStorage
+    store.otp = enteredOTP
+    localStorage.setItem('reset_email', store.email)
+    localStorage.setItem('reset_otp', enteredOTP)
+
     router.push('/reset-password')
   }
 }
@@ -100,39 +111,3 @@ function focusNext(index) {
   }
 }
 </script>
-
-<!-- <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-const identifier = ref('')
-const otpSent = ref(false)
-const otp = ref(['', '', '', '', '', ''])
-
-function handleAction() {
-  if (!otpSent.value) {
-    if (!identifier.value) {
-      alert('Please enter email or phone.')
-      return
-    }
-    // Simulate OTP sent
-    otpSent.value = true
-  } else {
-    const enteredOTP = otp.value.join('')
-    if (enteredOTP.length !== 6) {
-      alert('Please enter the complete 6-digit OTP.')
-      return
-    }
-    alert('OTP Verified!')
-    router.push('/reset-password')
-  }
-}
-
-function focusNext(index) {
-  if (otp.value[index].length === 1 && index < 5) {
-    const next = document.querySelectorAll('input')[index + 1]
-    next.focus()
-  }
-}
-</script> -->

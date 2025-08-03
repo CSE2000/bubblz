@@ -25,13 +25,9 @@ export const useVendorProfileStore = defineStore('vendorProfile', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await makeRequest('/employee/profile', 'PUT', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-      profile.value = response.data || null
-      return profile.value
+      const response = await makeRequest('/employee/profile', 'PUT', formData)
+      profiles.value = response.data || null
+      return profiles.value
     } catch (err) {
       console.error('Failed to update vendor profile:', err)
       error.value = err

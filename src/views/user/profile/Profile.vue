@@ -1,41 +1,5 @@
-<script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import { useUserProfileStore } from '@/stores/user/profileStore'
-
-const router = useRouter()
-const profileStore = useUserProfileStore()
-
-onMounted(() => {
-  profileStore.getUserProfile()
-})
-
-const user = computed(() => ({
-  name: profileStore.profile?.name,
-  role: profileStore.profile?.role,
-  image: profileStore.profile?.image,
-}))
-
-// Dynamic menu list
-const menuItems = ref([
-  { label: 'Booking History', icon: 'pi pi-stopwatch', route: '/booking-history' },
-  { label: 'Language Preference', icon: 'pi pi-language', route: '/user/language' },
-  { label: 'Change Password', icon: 'pi pi-lock', route: '/change-password' },
-  { label: 'Terms & Condition', icon: 'pi pi-question-circle', route: '/user/terms' },
-  { label: 'Privacy Policy', icon: 'pi pi-address-book', route: '/user/privacy' },
-  { label: 'Support', icon: 'pi pi-question', route: '/user/support' },
-])
-
-const logout = () => {
-  localStorage.clear()
-  sessionStorage.clear()
-  router.push('/login')
-}
-</script>
-
 <template>
-  <DefaultLayout class="md:px-40">
+  <DefaultLayout>
     <div class="bg-white min-h-screen w-full text-black">
       <!-- Profile Info -->
       <div class="p-4">
@@ -80,8 +44,43 @@ const logout = () => {
   </DefaultLayout>
 </template>
 
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import { useUserProfileStore } from '@/stores/user/profileStore'
+
+const router = useRouter()
+const profileStore = useUserProfileStore()
+
+onMounted(() => {
+  profileStore.getUserProfile()
+})
+
+const user = computed(() => ({
+  name: profileStore.profile?.name,
+  role: profileStore.profile?.role,
+  image: profileStore.profile?.image,
+}))
+
+// Dynamic menu list
+const menuItems = ref([
+  { label: 'Booking History', icon: 'pi pi-stopwatch', route: '/booking-history' },
+  { label: 'Language Preference', icon: 'pi pi-language', route: '' },
+  { label: 'Change Password', icon: 'pi pi-lock', route: '/change-password' },
+  { label: 'Terms & Condition', icon: 'pi pi-question-circle', route: '' },
+  { label: 'Privacy Policy', icon: 'pi pi-address-book', route: '' },
+  { label: 'Support', icon: 'pi pi-question', route: '' },
+])
+
+const logout = () => {
+  localStorage.clear()
+  sessionStorage.clear()
+  router.push('/login')
+}
+</script>
+
 <style scoped>
-/* Optional: Smooth tap feedback */
 button:active {
   opacity: 0.7;
 }

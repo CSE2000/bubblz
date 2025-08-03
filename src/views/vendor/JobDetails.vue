@@ -101,19 +101,13 @@
         </section>
 
         <!-- Action Buttons -->
-        <div class="space-y-3">
-          <button
-            v-if="jobStore.job.actions.can_start_job || jobStarted"
-            @click="handleStartJob"
-            class="block w-full text-center py-2 rounded-md font-medium transition-colors duration-200"
-            :class="
-              jobStarted
-                ? 'bg-green-600 text-white hover:bg-green-700'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-            "
+        <div class="space-y-3 mt-4">
+          <router-link
+            :to="{ name: 'StartJob', query: { id: jobId } }"
+            class="block w-full text-center py-2 rounded-md font-medium transition-colors duration-200 bg-blue-600 text-white hover:bg-blue-700"
           >
-            {{ jobStarted ? 'Complete Job' : 'Start Job' }}
-          </button>
+            Start Job
+          </router-link>
 
           <button
             v-if="jobStore.job.actions.can_connect_to_customer"
@@ -138,16 +132,12 @@ const route = useRoute()
 const jobStore = useJobDetailStore()
 const jobId = route.query.id
 
-console.log('Job ID:', jobId)
-
 const jobStarted = ref(false)
 
 function handleStartJob() {
   if (jobStarted.value) {
-    // Complete job logic here
     console.log('Completing job...')
   } else {
-    // Start job logic here
     jobStarted.value = true
     console.log('Starting job...')
   }

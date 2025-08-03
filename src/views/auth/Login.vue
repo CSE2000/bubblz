@@ -1,9 +1,8 @@
 <template>
   <div class="min-h-screen flex flex-col justify-center items-center px-4">
-    <div class="w-full max-w-lg">
+    <div class="w-full max-w-md">
       <div class="flex flex-col items-center mb-10">
-        <img src="/image/Bubbles.svg" alt="Bubble Logo" class="h-18 w-auto" />
-        <h1 class="text-5xl font-extrabold text-[#2076E2]">bubblz</h1>
+        <img src="/public/image/Bubblz_logo.png" alt="logo" class="h-auto w-full" />
       </div>
       <h2 class="text-2xl md:font-extrabold font-semibold text-start mb-6 text-gray-800">
         Welcome Back
@@ -86,13 +85,23 @@ const loginData = ref({
 const loginStore = useLoginStore()
 
 const handleLogin = async () => {
+  if (!loginData.value.email || !loginData.value.password) {
+    alert('Please enter both email and password')
+    return
+  }
+
   const success = await loginStore.loginUser({
     email: loginData.value.email,
     password: loginData.value.password,
   })
 
   if (success) {
-    const role = loginStore.role || ''
+    const role = loginStore.role
+    console.log('Login successful')
+    console.log('Email:', loginData.value.email)
+    console.log('Password:', loginData.value.password)
+    console.log('Role:', role)
+    
     if (role === 'employee') {
       router.push('/vendor/dashboard')
     } else {

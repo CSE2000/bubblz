@@ -9,23 +9,27 @@ export const useForgetPasswordStore = defineStore('forgetPassword', () => {
   const successMessage = ref('')
   const otpSent = ref(false)
   const verified = ref(false)
-  const userIdentifier = ref('')
 
-  const sendOTP = async (identifier) => {
+  const email = ref('')
+  const otp = ref('')
+  const newPassword = ref('')
+  const confirmPassword = ref('')
+
+  const sendOTP = async (userEmail) => {
     loading.value = true
     error.value = null
     successMessage.value = ''
-    userIdentifier.value = identifier
+    email.value = userEmail
 
     try {
-      const response = await makeRequest('/forgot-password', 'POST', { identifier })
+      const response = await makeRequest('/send-otp-forgot-password', 'POST', { email: userEmail })
 
-      if (response?.data?.success || response?.status === 200) {
+      if (response?.status === 'success') {
         otpSent.value = true
         successMessage.value = 'OTP sent successfully.'
         return true
       } else {
-        error.value = response?.data?.message || 'Failed to send OTP.'
+        error.value = response?.message || 'Failed to send OTP.'
         return false
       }
     } catch (err) {
@@ -36,23 +40,26 @@ export const useForgetPasswordStore = defineStore('forgetPassword', () => {
     }
   }
 
-  const resetPassword = async (newPassword) => {
+  // Step 2: Reset Password
+  const resetPassword = async () => {
     loading.value = true
     error.value = null
     successMessage.value = ''
 
     try {
       const response = await makeRequest('/forgot-password', 'POST', {
-        identifier: userIdentifier.value,
-        password: newPassword,
+        email: email.value,
+        otp: otp.value,
+        new_password: newPassword.value,
+        confirm_password: confirmPassword.value,
       })
 
-      if (response?.data?.success || response?.status === 200) {
+      if (response?.status === 'success') {
         successMessage.value = 'Password reset successful.'
         verified.value = true
         return true
       } else {
-        error.value = response?.data?.message || 'Failed to reset password.'
+        error.value = response?.message || 'Failed to reset password.'
         return false
       }
     } catch (err) {
@@ -69,8 +76,11 @@ export const useForgetPasswordStore = defineStore('forgetPassword', () => {
     successMessage,
     otpSent,
     verified,
+    email,
+    otp,
+    newPassword,
+    confirmPassword,
     sendOTP,
     resetPassword,
-    userIdentifier,
   }
 })

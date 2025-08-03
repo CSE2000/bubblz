@@ -22,11 +22,11 @@ export const useUserProfileStore = defineStore('userProfile', () => {
   }
 
   // put
-  const updateUserProfile = async (id, formData) => {
+  const updateUserProfile = async (formData) => {
     loading.value = true
     error.value = null
     try {
-      const response = await makeRequest(`/user/profile/${id}`, 'PUT', formData, {
+      const response = await makeRequest('/user/profile', 'PUT', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

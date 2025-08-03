@@ -1,49 +1,3 @@
-<script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import { useVendorProfileStore } from '@/stores/vendor/profileStore'
-import { storeToRefs } from 'pinia'
-
-const router = useRouter()
-
-const vendorProfile = useVendorProfileStore()
-const { profile } = storeToRefs(vendorProfile)
-const { getVendorProfile } = vendorProfile
-
-const user = ref({
-  name: '',
-  role: '',
-  image: '/image/profile-placeholder.jpg',
-})
-
-const menuItems = ref([
-  { label: 'Booking History', icon: 'pi pi-stopwatch', route: '/vendor/booking-history' },
-  { label: 'Language Preference', icon: 'pi pi-language', route: '/user/language' },
-  { label: 'Change Password', icon: 'pi pi-lock', route: '/vendor/change-password' },
-  { label: 'Terms & Condition', icon: 'pi pi-question-circle', route: '/user/terms' },
-  { label: 'Privacy Policy', icon: 'pi pi-address-book', route: '/user/privacy' },
-  { label: 'Support', icon: 'pi pi-question', route: '/user/support' },
-])
-
-const handleLogout = () => {
-  router.push('/logout')
-}
-
-onMounted(async () => {
-  await getVendorProfile()
-
-  const current = profile.value?.items?.[0]
-  if (current && current.user) {
-    user.value.name = current.user.name || ''
-    user.value.role = current.specialization || 'Employee'
-    user.value.image = current.user.image_url
-      ? current.user.image_url
-      : '/image/profile-placeholder.jpg'
-  }
-})
-</script>
-
 <template>
   <DefaultLayout class="md:px-40">
     <div class="bg-white min-h-screen w-full text-black">
@@ -81,7 +35,10 @@ onMounted(async () => {
 
       <!-- Logout -->
       <div class="mt-4 px-4">
-        <button @click="handleLogout" class="text-red-500 font-semibold text-sm flex items-center gap-2">
+        <button
+          @click="handleLogout"
+          class="text-red-500 font-semibold text-sm flex items-center gap-2"
+        >
           <i class="pi pi-sign-out mr-2"></i>
           <span>Logout</span>
         </button>
@@ -89,6 +46,52 @@ onMounted(async () => {
     </div>
   </DefaultLayout>
 </template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import { useVendorProfileStore } from '@/stores/vendor/profileStore'
+import { storeToRefs } from 'pinia'
+
+const router = useRouter()
+
+const vendorProfileStore = useVendorProfileStore()
+const { profiles } = storeToRefs(vendorProfileStore)
+const { getVendorProfile } = vendorProfileStore
+
+const user = ref({
+  name: '',
+  role: '',
+  image: '/image/profile-placeholder.jpg',
+})
+
+const menuItems = ref([
+  { label: 'Booking History', icon: 'pi pi-stopwatch', route: '/vendor/booking-history' },
+  { label: 'Language Preference', icon: 'pi pi-language', route: '' },
+  { label: 'Change Password', icon: 'pi pi-lock', route: '/vendor/change-password' },
+  { label: 'Terms & Condition', icon: 'pi pi-question-circle', route: '' },
+  { label: 'Privacy Policy', icon: 'pi pi-address-book', route: '' },
+  { label: 'Support', icon: 'pi pi-question', route: '' },
+])
+
+const handleLogout = () => {
+  localStorage.clear()
+  sessionStorage.clear()
+  router.push('/login')
+}
+
+onMounted(async () => {
+  await getVendorProfile()
+
+  const current = profiles.value?.items?.[0] // correct reference here
+  if (current && current.user) {
+    user.value.name = current.user.name || 'Employee'
+    user.value.role = current.specialization || 'Employee'
+    user.value.image = current.user.image_url || '/image/profile-placeholder.jpg'
+  }
+})
+</script>
 
 <style scoped>
 /* Optional: Smooth tap feedback */

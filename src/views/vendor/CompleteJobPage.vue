@@ -1,27 +1,3 @@
-<script setup>
-import { ref } from 'vue'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
-
-const photos = ref([])
-const checkboxes = ref([
-  { label: "Job Completed as per Client's request", checked: false },
-  { label: 'All material and Tools Cleaned Up', checked: false },
-  { label: 'Client Satisfied with the Service', checked: false },
-])
-const isDone = ref(false)
-
-function handleFileUpload(event) {
-  const files = event.target.files
-  for (let file of files) {
-    photos.value.push(URL.createObjectURL(file))
-  }
-}
-
-function markDone() {
-  isDone.value = true
-}
-</script>
-
 <template>
   <DefaultLayout>
     <div class="max-w-md mx-auto p-4 space-y-6 text-gray-800">
@@ -95,6 +71,31 @@ function markDone() {
     </div>
   </DefaultLayout>
 </template>
+
+
+<script setup>
+import { ref } from 'vue'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+
+const photos = ref([])
+const checkboxes = ref([
+  { label: "Job Completed as per Client's request", checked: false },
+  { label: 'All material and Tools Cleaned Up', checked: false },
+  { label: 'Client Satisfied with the Service', checked: false },
+])
+const isDone = ref(false)
+
+function handleFileUpload(event) {
+  const files = event.target.files
+  for (let file of files) {
+    photos.value.push(URL.createObjectURL(file))
+  }
+}
+
+function markDone() {
+  isDone.value = true
+}
+</script>
 
 <style scoped>
 input[type='checkbox'] {

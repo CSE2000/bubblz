@@ -1,5 +1,5 @@
 <template>
-  <DefaultLayout class="md:px-40">
+  <DefaultLayout>
     <div class="space-y-6 max-w-2xl mx-auto">
       <!-- Today's Schedule -->
       <section class="p-4 space-y-2">
@@ -101,9 +101,25 @@ const visibleBookings = computed(() => {
   return showAllBookings.value ? sorted : sorted.slice(0, 2)
 })
 
-const filteredBookings = computed(() =>
-  selectedTab.value === 'current' ? bookingStore.currentBookings : bookingStore.completedBookings,
-)
+const filteredBookings = computed(() => {
+  if (!bookingStore.currentBookingsData) return []
+
+  if (selectedTab.value === 'current') {
+    return bookingStore.currentBookingsData.filter((b) =>
+      ['current', 'pending', 'accepted'].includes(b.status?.toLowerCase()),
+    )
+  } else if (selectedTab.value === 'completed') {
+    return bookingStore.currentBookingsData.filter((b) => b.status?.toLowerCase() === 'completed')
+  }
+
+  return []
+})
+
+// const filteredBookings = computed(() =>
+//   selectedTab.value === 'current'
+//     ? bookingStore.currentBookingsData
+//     : bookingStore.completedBookings,
+// )
 
 // Methods
 const toggleShowAll = () => {
@@ -118,11 +134,10 @@ const rejectBooking = async (bookingId) => {
   await bookingStore.rejectBooking(bookingId)
 }
 
-// Load data on mount
 onMounted(() => {
-  // Pass employee ID (you might want to get this from auth store or route params)
-  bookingStore.fetchTodaySchedule() // Replace 10 with actual employee ID
+  bookingStore.fetchTodaySchedule()
   bookingStore.fetchNewBookings()
   bookingStore.fetchAllBookings()
+  bookingStore.fetchCurrentBookings()
 })
 </script>

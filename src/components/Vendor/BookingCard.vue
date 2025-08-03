@@ -7,7 +7,7 @@
       </div>
 
       <div>
-        <p class="font-medium text-xs">{{ booking.service }}</p>
+        <p class="font-medium text-xs md:text-lg">{{ booking.service }}</p>
         <p class="text-xs text-gray-500">{{ booking.client }}</p>
       </div>
     </div>

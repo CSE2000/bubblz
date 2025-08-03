@@ -1,8 +1,7 @@
-// // src/utils/request.js
 import axios from 'axios'
 
 // === BASE CONFIG ===
-export const BASE_URL = 'https://jxtqdwlv-5000.inc1.devtunnels.ms'
+export const BASE_URL = 'https://z48fp069-5000.inc1.devtunnels.ms'
 axios.defaults.baseURL = BASE_URL
 
 // ✅ Allow credentials (for cookies if used)
@@ -25,9 +24,16 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only redirect to login for actual authentication errors
+    if (
+      (error.response?.status === 401 &&
+        error.response?.data?.message?.toLowerCase().includes('token')) ||
+      error.response?.data?.message?.toLowerCase().includes('unauthorized') ||
+      error.response?.data?.message?.toLowerCase().includes('authentication')
+    ) {
       console.warn('Unauthorized – logging out')
       localStorage.removeItem('token')
+      localStorage.removeItem('role')
       window.location.href = '/login'
     }
     return Promise.reject(error)
@@ -36,16 +42,6 @@ axios.interceptors.response.use(
 
 /**
  * Reusable function to make API calls
- *
- * @param {string} endpoint - API endpoint (e.g. 'user/login')
- * @param {string} method - HTTP method ('GET', 'POST', etc.)
- * @param {Object} data - Request body (for POST/PUT)
- * @param {Object} config - Extra axios config (optional)
- * @param {Object} params - URL query params
- * @param {number} [wait=0] - Optional delay in ms
- * @param {string|number} [id=null] - Optional resource ID (e.g. user/:id)
- * @param {string} [subPath=''] - Optional sub-path (e.g. '/admin')
- * @returns {Promise<any>}
  */
 export async function makeRequest(
   endpoint,
@@ -85,8 +81,92 @@ export async function makeRequest(
 
 // import axios from 'axios'
 
+// // === BASE CONFIG ===
+// export const BASE_URL = 'https://z48fp069-5000.inc1.devtunnels.ms'
+// axios.defaults.baseURL = BASE_URL
+
+// // ✅ Allow credentials (for cookies if used)
+// axios.defaults.withCredentials = true
+
+// // === REQUEST INTERCEPTOR ===
+// // Automatically adds token to headers
+// axios.interceptors.request.use(
+//   (config) => {
+//     const token = localStorage.getItem('token')
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`
+//     }
+//     return config
+//   },
+//   (error) => Promise.reject(error),
+// )
+
+// // === RESPONSE INTERCEPTOR ===
+// axios.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response?.status === 401) {
+//       console.warn('Unauthorized – logging out')
+//       localStorage.removeItem('token')
+//       window.location.href = '/login'
+//     }
+//     return Promise.reject(error)
+//   },
+// )
+
+// /**
+//  * Reusable function to make API calls
+//  *
+//  * @param {string} endpoint - API endpoint (e.g. 'user/login')
+//  * @param {string} method - HTTP method ('GET', 'POST', etc.)
+//  * @param {Object} data - Request body (for POST/PUT)
+//  * @param {Object} config - Extra axios config (optional)
+//  * @param {Object} params - URL query params
+//  * @param {number} [wait=0] - Optional delay in ms
+//  * @param {string|number} [id=null] - Optional resource ID (e.g. user_id)
+//  * @param {string} [subPath=''] - Optional sub-path (e.g. '/employee')
+//  * @returns {Promise<any>}
+//  */
+// export async function makeRequest(
+//   endpoint,
+//   method = 'GET',
+//   data = {},
+//   config = {},
+//   params = {},
+//   wait = 0,
+//   id = null,
+//   subPath = '',
+// ) {
+//   try {
+//     if (!endpoint) throw new Error('Endpoint is required')
+
+//     if (wait > 0) {
+//       await new Promise((res) => setTimeout(res, wait))
+//     }
+
+//     let fullPath = endpoint
+//     if (subPath) fullPath += `${subPath}`
+//     if (id !== null && id !== undefined) fullPath += `/${id}`
+
+//     const response = await axios({
+//       url: fullPath,
+//       method: method.toUpperCase(),
+//       data,
+//       params,
+//       ...config,
+//     })
+
+//     return response.data
+//   } catch (error) {
+//     console.error(`[API Error] ${method} ${endpoint}`, error)
+//     throw error
+//   }
+// }
+
+// import axios from 'axios'
+
 // // === BASE URL CONFIGURATION ===
-// const BASE_URL = 'https://jxtqdwlv-5000.inc1.devtunnels.ms' // Replace with your backend URL
+// const BASE_URL = 'https://z48fp069-5000.inc1.devtunnels.ms' // Replace with your backend URL
 // axios.defaults.baseURL = BASE_URL
 // axios.defaults.withCredentials = true
 

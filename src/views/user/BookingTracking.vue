@@ -1,5 +1,5 @@
 <template>
-  <DefaultLayout class="md:px-40">
+  <DefaultLayout>
     <div class="bg-white space-y-4 p-4 md:p-0">
       <div>
         <h2 class="font-semibold text-sm text-gray-700 mb-2">Your Booking</h2>

@@ -1,82 +1,7 @@
-<script setup>
-import { ref } from 'vue'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import { usePasswordStore } from '@/stores/vendor/passwordUpdate'
-import { storeToRefs } from 'pinia'
-
-const passwordStore = usePasswordStore()
-const { updatePassword } = storeToRefs(passwordStore)
-
-const form = ref({
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: '',
-})
-
-const errors = ref({
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: '',
-})
-
-const showCurrentPassword = ref(false)
-const showNewPassword = ref(false)
-const showConfirmPassword = ref(false)
-
-const validateForm = () => {
-  let valid = true
-  errors.value = {
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  }
-
-  if (!form.value.currentPassword.trim()) {
-    errors.value.currentPassword = 'Current password is required'
-    valid = false
-  }
-
-  if (!form.value.newPassword.trim()) {
-    errors.value.newPassword = 'New password is required'
-    valid = false
-  } else if (form.value.newPassword.length < 6) {
-    errors.value.newPassword = 'New password must be at least 6 characters'
-    valid = false
-  }
-
-  if (form.value.confirmPassword !== form.value.newPassword) {
-    errors.value.confirmPassword = 'Passwords do not match'
-    valid = false
-  }
-
-  return valid
-}
-
-const handleSubmit = async () => {
-  if (validateForm()) {
-    const user = JSON.parse(localStorage.getItem('user') || '{}')
-    const payload = {
-      current_password: form.value.currentPassword,
-      new_password: form.value.newPassword,
-      confirm_password: form.value.confirmPassword,
-    }
-    await passwordStore.updatePassword(payload)
-
-    if (passwordStore.success) {
-      form.value = {
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      }
-    }
-  }
-}
-</script>
-
 <template>
-  <DefaultLayout class="md:px-40">
-    <div class="max-w-md mx-auto p-6 md:p-10 bg-white shadow-sm rounded-md">
-      <h2 class="text-xl font-semibold mb-6">Change Password</h2>
+  <DefaultLayout>
+    <div class="max-w-md mx-auto p-6 md:p-10">
+      <h2 class="text-xl xm:text:base font-semibold mb-6">Change Password</h2>
 
       <!-- Current Password -->
       <div class="mb-4">
@@ -152,3 +77,79 @@ const handleSubmit = async () => {
     </div>
   </DefaultLayout>
 </template>
+
+
+<script setup>
+import { ref } from 'vue'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import { usePasswordStore } from '@/stores/vendor/passwordUpdate'
+import { storeToRefs } from 'pinia'
+
+const passwordStore = usePasswordStore()
+const { updatePassword } = storeToRefs(passwordStore)
+
+const form = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+})
+
+const errors = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+})
+
+const showCurrentPassword = ref(false)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
+
+const validateForm = () => {
+  let valid = true
+  errors.value = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  }
+
+  if (!form.value.currentPassword.trim()) {
+    errors.value.currentPassword = 'Current password is required'
+    valid = false
+  }
+
+  if (!form.value.newPassword.trim()) {
+    errors.value.newPassword = 'New password is required'
+    valid = false
+  } else if (form.value.newPassword.length < 6) {
+    errors.value.newPassword = 'New password must be at least 6 characters'
+    valid = false
+  }
+
+  if (form.value.confirmPassword !== form.value.newPassword) {
+    errors.value.confirmPassword = 'Passwords do not match'
+    valid = false
+  }
+
+  return valid
+}
+
+const handleSubmit = async () => {
+  if (validateForm()) {
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    const payload = {
+      current_password: form.value.currentPassword,
+      new_password: form.value.newPassword,
+      confirm_password: form.value.confirmPassword,
+    }
+    await passwordStore.updatePassword(payload)
+
+    if (passwordStore.success) {
+      form.value = {
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      }
+    }
+  }
+}
+</script>

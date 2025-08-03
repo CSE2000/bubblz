@@ -8,21 +8,17 @@ export const useJobStore = defineStore('jobStore', () => {
   const uploadSuccess = ref(false)
   const uploadedImageUrl = ref(null)
 
-  const uploadJobStartImage = async (imageBlob) => {
+  const uploadJobStartImage = async (imageBlob, bookingId) => {
     uploading.value = true
     uploadError.value = null
     uploadSuccess.value = false
 
     try {
-      // Create FormData
       const formData = new FormData()
       formData.append('image', imageBlob, 'job-start-photo.png')
+      formData.append('booking_id', bookingId)
 
-      const response = await makeRequest('/vendor/upload-image-before', 'POST', formData, {
-        headers: {
-          // Don't set Content-Type, let browser set it for FormData
-        }
-      })
+      const response = await makeRequest('/vendor/upload-image-before', 'POST', formData)
 
       uploadSuccess.value = true
       uploadedImageUrl.value = response?.data?.image_url || null
@@ -33,6 +29,18 @@ export const useJobStore = defineStore('jobStore', () => {
       throw err
     } finally {
       uploading.value = false
+    }
+  }
+
+  const completeJob = async (bookingId) => {
+    try {
+      const response = await makeRequest(`/bookings/complete`, 'PUT', {
+        booking_id: bookingId,
+      })
+      return response.data
+    } catch (err) {
+      console.error('Job completion failed:', err)
+      throw err
     }
   }
 
@@ -49,9 +57,10 @@ export const useJobStore = defineStore('jobStore', () => {
     uploadError,
     uploadSuccess,
     uploadedImageUrl,
-    
+
     // Actions
     uploadJobStartImage,
-    resetUploadState
+    resetUploadState,
+    completeJob,
   }
 })

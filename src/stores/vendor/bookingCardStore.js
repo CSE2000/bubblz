@@ -7,13 +7,14 @@ export const useVendorBookingStore = defineStore('vendorBooking', () => {
   const todaySchedule = ref(null)
   const newBookings = ref([])
   const allBookings = ref([])
+  const currentBookingsData = ref([])
   const loading = ref(false)
 
-  // Fetch today's schedule for specific employee
-  const fetchTodaySchedule = async (employeeId) => {
+  // Updated fetchTodaySchedule() with no employeeId
+  const fetchTodaySchedule = async () => {
     loading.value = true
     try {
-      const res = await makeRequest(`/employee/todays-schedule/${employeeId}`, 'GET')
+      const res = await makeRequest('/employee/todays-schedule', 'GET')
       if (res?.status === 'success' && res?.data) {
         todaySchedule.value = res.data
       }
@@ -98,6 +99,26 @@ export const useVendorBookingStore = defineStore('vendorBooking', () => {
     }
   }
 
+  const fetchCurrentBookings = async () => {
+    loading.value = true
+    try {
+      const res = await makeRequest(
+        '/bookings/history/vendor',
+        'GET',
+        {},
+        {},
+        { status: 'current' },
+      )
+      if (res?.status === 'success' && res?.data) {
+        currentBookingsData.value = res.data
+      }
+    } catch (err) {
+      console.error('Failed to fetch current bookings:', err)
+    } finally {
+      loading.value = false
+    }
+  }
+
   // Computed properties for filtering bookings
   const currentBookings = computed(() => allBookings.value.filter((b) => b.status === 'current'))
 
@@ -112,10 +133,12 @@ export const useVendorBookingStore = defineStore('vendorBooking', () => {
     currentBookings,
     completedBookings,
     loading,
+    currentBookingsData,
     fetchTodaySchedule,
     fetchNewBookings,
     fetchAllBookings,
     acceptBooking,
     rejectBooking,
+    fetchCurrentBookings,
   }
 })

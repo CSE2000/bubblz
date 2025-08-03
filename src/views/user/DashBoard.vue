@@ -1,5 +1,5 @@
 <template>
-  <DefaultLayout class="md:px-40">
+  <DefaultLayout>
     <BannerPromo />
 
     <!-- Vehicle Type Section -->
@@ -24,9 +24,9 @@
     <FAQ class="py-6" />
 
     <!-- Popular Services -->
-    <section class="py-6 px-2">
+    <section class="py-4 px-2">
       <h3 class="text-lg font-bold mb-4 text-start">Popular Service booked Recently</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 px-2">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 px-2">
         <PopularServices
           v-for="(service, index) in allServices"
           :key="index"

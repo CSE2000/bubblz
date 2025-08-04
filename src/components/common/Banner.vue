@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import { useBannerStore } from '@/stores/user/bannerStore'
 import { storeToRefs } from 'pinia'
 import { buildUrl } from '@/utils/buildUrl'
 
+const router = useRouter()
 const bannerStore = useBannerStore()
 const { banners } = storeToRefs(bannerStore)
 const { getBanners } = bannerStore
@@ -38,6 +40,13 @@ const startRotation = () => {
   }
 }
 
+const handleBannerClick = () => {
+  const slug = activeBanners.value[currentIndex.value]?.slug
+  if (slug) {
+    router.push(`/services/${slug}`)
+  }
+}
+
 onMounted(async () => {
   await getBanners()
   startRotation()
@@ -52,14 +61,15 @@ onBeforeUnmount(() => {
   <div v-if="activeBanners.length" class="w-full py-4 px-2">
     <div class="relative w-full h-48 sm:h-64 md:h-72 lg:h-80 rounded-lg overflow-hidden shadow">
       <transition name="fade" mode="out-in">
-        <a :href="getSlugUrl()" :key="activeBanners[currentIndex]?.id || currentIndex">
-          <img
-            :src="getImageUrl()"
-            :alt="activeBanners[currentIndex]?.name || 'Banner'"
-            class="w-full h-full object-cover"
-            @error="handleImageError"
-          />
-        </a>
+        <!-- <a :href="getSlugUrl()" :key="activeBanners[currentIndex]?.id || currentIndex"> -->
+        <img
+          :key="activeBanners[currentIndex]?.id || currentIndex"
+          :src="getImageUrl()"
+          :alt="activeBanners[currentIndex]?.name || 'Banner'"
+          class="w-full h-full object-cover"
+          @error="handleImageError"
+        />
+        <!-- </a> -->
       </transition>
     </div>
   </div>
@@ -77,4 +87,3 @@ onBeforeUnmount(() => {
   opacity: 0;
 }
 </style>
- 

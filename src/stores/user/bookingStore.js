@@ -12,7 +12,14 @@ export const useBookingStore = defineStore('bookingStore', () => {
   const alternateNumbers = ref([])
   const allBookings = ref([])
 
-  const createBooking = async ({ service_id, employee_id, scheduled_date, slot_time }) => {
+  const createBooking = async ({
+    service_id,
+    employee_id,
+    scheduled_date,
+    slot_time,
+    coupon_code,
+    payment_method,
+  }) => {
     loading.value = true
     bookingError.value = null
 
@@ -22,6 +29,8 @@ export const useBookingStore = defineStore('bookingStore', () => {
         employee_id,
         scheduled_date,
         slot_time,
+        coupon_code,
+        payment_method: 'UPI',
       })
       bookingSuccess.value = true
       lastBooking.value = response?.data
@@ -32,6 +41,33 @@ export const useBookingStore = defineStore('bookingStore', () => {
       throw err
     } finally {
       loading.value = false
+    }
+  }
+
+  //verifyPayment
+  const verifyPayment = async (transaction_id) => {
+    try {
+      const url = `/payment-verify/${transaction_id}`
+      const response = await makeRequest(url, 'GET')
+
+      if (response?.status === 'COMPLETED') {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message,
+        }
+      } else {
+        return {
+          success: false,
+          message: response?.message || 'Payment not completed',
+        }
+      }
+    } catch (error) {
+      console.error('Payment verification error:', error)
+      return {
+        success: false,
+        message: 'An error occurred while verifying payment.',
+      }
     }
   }
 
@@ -129,9 +165,7 @@ export const useBookingStore = defineStore('bookingStore', () => {
     return [...array].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
   }
 
-  // Return all functions and state
   return {
-    // State
     bookingSuccess,
     bookingError,
     loading,
@@ -153,5 +187,6 @@ export const useBookingStore = defineStore('bookingStore', () => {
     addAlternateNumber,
     getAllBookings,
     allBookings,
+    verifyPayment,
   }
 })

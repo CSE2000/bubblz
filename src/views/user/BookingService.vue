@@ -323,9 +323,11 @@ const { getUserProfile } = userProfileStore
 
 const bookingStore = useBookingStore()
 const { getCars, userCars, userAddresses, alternateNumbers } = storeToRefs(bookingStore)
+const { verifyPayment } = useBookingStore()
 
 const router = useRouter()
 const route = useRoute()
+const paymentInProgress = ref(false)
 
 // Get the service ID from route params
 const props = defineProps({
@@ -587,16 +589,28 @@ const handlePayment = async () => {
       service_id: selectedServices.value[0]?.id || 1,
       scheduled_date: new Date().toISOString().split('T')[0],
       slot_time: selectedSlot.value.replace(' ', ''),
+      coupon_code: appliedCoupon.value?.code || '',
+      payment_method: 'UPI',
     }
 
     const res = await bookingStore.createBooking(payload)
-
     if (res) {
-      alert('Booking successful!')
-      router.push({ name: 'PaymentSuccess' })
+      console.log(res.payment_url)
+      const transactionId = res.transaction_id || res?.id
+      window.open(res.payment_url, '_blank')
+      // const result = await verifyPayment(transactionId)
+
+      // if (result.success) {
+      //   alert('Payment verified successfully!')
+      //   router.push({ name: 'PaymentSuccess' })
+      // } else {
+      //   alert(`Payment failed: ${result.message}`)
+      // }
+    } else {
+      alert('Booking created but missing transaction ID. Please contact support.')
     }
   } catch (err) {
-    alert('Booking failed. Please try again.')
+    alert('Booking or payment verification failed. Please try again.')
   }
 }
 </script>

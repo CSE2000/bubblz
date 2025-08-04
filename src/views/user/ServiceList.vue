@@ -1,29 +1,3 @@
-<template>
-  <DefaultLayout>
-    <BannerPromo />
-    <section class="py-6 bg-white text-start">
-      <h2 class="text-xl font-bold mb-4">{{ categoryName }} Services</h2>
-      <div
-        v-if="filteredServices.length > 0"
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4"
-      >
-        <PopularServices
-          v-for="(service, index) in filteredServices"
-          :key="index"
-          :vendorId="service.id"
-          :label="service.name"
-          :type="service.category_id"
-          :image="service.image_filename"
-          :service="service"
-        />
-      </div>
-      <div v-else class="px-4">
-        <p class="text-gray-500 text-center py-8">No services available for {{ categoryName }}</p>
-      </div>
-    </section>
-  </DefaultLayout>
-</template>
-
 <script setup>
 import { onMounted, computed } from 'vue'
 import { storeToRefs } from 'pinia'
@@ -76,3 +50,29 @@ onMounted(() => {
   getAllServices()
 })
 </script>
+
+<template>
+  <DefaultLayout>
+    <BannerPromo />
+    <section class="py-6 bg-white text-start">
+      <h2 class="text-xl font-bold mb-4">{{ categoryName }} Services</h2>
+      <div
+        v-if="filteredServices.length > 0"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4"
+      >
+        <PopularServices
+          v-for="(service, index) in filteredServices"
+          :key="index"
+          :vendorId="service.id"
+          :label="service.name"
+          :type="service.category_id"
+          :image="service.image_filename"
+          :service="service"
+        />
+      </div>
+      <div v-else class="px-4">
+        <p class="text-gray-500 text-center py-8">No services available for {{ categoryName }}</p>
+      </div>
+    </section>
+  </DefaultLayout>
+</template>
